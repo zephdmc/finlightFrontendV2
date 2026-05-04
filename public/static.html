@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FinLight - Static Test</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https:; connect-src 'self' https://finlight-backend.onrender.com https:; script-src 'self' 'unsafe-inline' https:;">
+</head>
+<body>
+    <h1>Static Test Page</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="result"></pre>
+
+    <script>
+        function testLogin() {
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing login...';
+            
+            fetch('https://finlight-backend.onrender.com/api/auth/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email: 'admin@go.com', password: '123admin'})
+            })
+            .then(res => res.json())
+            .then(data => {
+                resultEl.textContent = 'SUCCESS: ' + JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                resultEl.textContent = 'ERROR: ' + err.message;
+            });
+        }
+    </script>
+</body>
+</html>

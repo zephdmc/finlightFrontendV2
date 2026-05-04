@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    
+    <!-- Content Security Policy (CSP) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.paystack.com https://js.paystack.co https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://api.paystack.co https://finlights.web.app https://*.paystack.com https://finlight-backend.onrender.com https://okoro.com wss:; frame-src https://checkout.paystack.com https://www.google.com; object-src 'none'; base-uri 'self'; form-action 'self';">    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Finlight - Financial Management Application. A comprehensive financial transparency and management platform for community organizations, club, Alumni age grades, cooperatives, and student groups." />
+    <meta name="keywords" content="financial management, age grade, cooperative, community finance, payment management, dues tracking" />
+    <meta name="author" content="FinLight" />
+    <meta name="theme-color" content="#3B82F6" />
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="FinLight - Financial Management" />
+    <meta property="og:description" content="Simplify financial management for your community organization with FinLight. Track payments, manage members, and generate reports effortlessly." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://finlight.web.app" />
+    <meta property="og:site_name" content="FinLight" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="FinLight - Financial Management" />
+    <meta name="twitter:description" content="Simplify financial management for your community organization with FinLight." />
+    <meta name="twitter:image" content="/twitter-image.png" />
+    <meta name="twitter:site" content="@FinLight" />
+    
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Preconnect & DNS Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.paystack.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://api.paystack.com" />
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
+    <title>FinLight - Financial Management Application</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
