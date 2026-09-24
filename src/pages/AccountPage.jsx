@@ -1,28 +1,31 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
-import { 
-  Plus, 
-  Filter, 
-  Download, 
-  TrendingUp, 
-  TrendingDown, 
+import {
+  Plus,
+  Filter,
+  Download,
+  TrendingUp,
+  TrendingDown,
   Calendar,
   DollarSign,
   Search,
   X,
   Wallet,
   RefreshCw,
-  CreditCard
+  CreditCard,
+  Users,
+  CheckCircle, ArrowLeft
 } from 'lucide-react';
 import TransactionService from '../services/TransactionService';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useNavigate, Link } from 'react-router-dom';
+import { useTransactions, usePaymentSummary, usePaymentsWithPenalties } from '../hooks/usePaymentData';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const AccountPage = () => {
-  const { isAdmin } = useAuth();
-  const [transactions, setTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user, isAdmin } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState({
     type: 'all',
@@ -36,13 +39,18 @@ const AccountPage = () => {
     totalExpense: 0,
     balance: 0,
     incomeCount: 0,
-    expenseCount: 0
+    expenseCount: 0,
+    paymentCount: 0,
+    totalPayments: 0
   });
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  
+  const [transactions, setTransactions] = useState([]);
+
   // Modal states
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successData, setSuccessData] = useState({ type: '', amount: 0, name: '' });
   const [modalLoading, setModalLoading] = useState(false);
   const [incomeForm, setIncomeForm] = useState({
     amount: '',
@@ -56,12 +64,42 @@ const AccountPage = () => {
     date: new Date().toISOString().split('T')[0],
     description: ''
   });
+  const navigate = useNavigate();
+
+  // Use ref to prevent infinite loop
+  const isProcessingRef = useRef(false);
+  const dataLoadedRef = useRef(false);
+
+  // ========== REACT QUERY HOOKS ==========
+  const {
+    data: incomeTransactions = [],
+    isLoading: incomeLoading,
+    refetch: refetchIncomes
+  } = useTransactions('income', 100);
+
+  const {
+    data: expenseTransactions = [],
+    isLoading: expenseLoading,
+    refetch: refetchExpenses
+  } = useTransactions('expenditure', 100);
+
+  const {
+    data: payments = [],
+    isLoading: paymentsLoading,
+    refetch: refetchPayments
+  } = usePaymentsWithPenalties();
+
+  const {
+    data: summary = {},
+    isLoading: summaryLoading,
+    refetch: refetchSummary
+  } = usePaymentSummary(user?._id || user?.id);
 
   const incomeSources = [
     'Membership Fees', 'Donations', 'Event Income', 'Investment Returns',
     'Grants', 'Sponsorships', 'Other Income', 'Member Payments'
   ];
-  
+
   const expensePurposes = [
     'Event Expenses', 'Utilities', 'Salaries', 'Maintenance', 'Charity',
     'Office Supplies', 'Transport', 'Equipment', 'Marketing', 'Other Expenses'
@@ -73,164 +111,215 @@ const AccountPage = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Process transactions when data loads - ONLY ONCE
   useEffect(() => {
-    fetchAllTransactions();
-  }, []);
+    if (!isProcessingRef.current && !incomeLoading && !expenseLoading && !paymentsLoading && !dataLoadedRef.current) {
+      dataLoadedRef.current = true;
+      processTransactions();
+    }
+  }, [incomeTransactions, expenseTransactions, payments, incomeLoading, expenseLoading, paymentsLoading]);
 
+  // Calculate stats when transactions change
   useEffect(() => {
-    calculateStats();
+    if (transactions.length > 0) {
+      calculateStats();
+    }
   }, [transactions]);
 
-  const fetchAllTransactions = async () => {
-    setLoading(true);
-    try {
-      let allTransactions = [];
-      let totalIncome = 0;
-      let totalExpense = 0;
+  const processTransactions = () => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
 
-      // Fetch incomes
-      try {
-        const incomesResponse = await api.get('/transactions/income/public?limit=100');
-        let incomes = [];
-        if (incomesResponse?.data?.data?.records) {
-          incomes = incomesResponse.data.data.records;
-        } else if (incomesResponse?.data?.records) {
-          incomes = incomesResponse.data.records;
-        } else if (Array.isArray(incomesResponse?.data)) {
-          incomes = incomesResponse.data;
-        }
-        
-        incomes.forEach(inc => {
-          allTransactions.push({
-            id: inc._id,
-            type: 'income',
-            amount: inc.amount,
-            date: inc.date,
-            description: inc.description,
-            source: inc.source,
-            isFromPayment: false
+
+    // Process income transactions (manual)
+    const formattedIncomes = (incomeTransactions || []).map(income => ({
+      id: income?._id,
+      type: 'income',
+      subType: 'manual_income',
+      category: income?.source || income?.type || 'Manual Income',
+      amount: income?.amount || 0,
+      description: income?.description || '',
+      source: income?.source || 'Unknown',
+      date: income?.createdAt || income?.date,
+      createdAt: income?.createdAt,
+      icon: 'TrendingUp'
+    }));
+
+    // Process expense transactions
+    const formattedExpenses = (expenseTransactions || []).map(exp => ({
+      id: exp?._id,
+      type: 'expenditure',
+      subType: 'expense',
+      category: exp?.purpose || 'Expense',
+      amount: exp?.amount || 0,
+      description: exp?.description || '',
+      purpose: exp?.purpose || 'Unknown',
+      date: exp?.createdAt || exp?.date,
+      createdAt: exp?.createdAt,
+      icon: 'TrendingDown'
+    }));
+
+    // Format payments as INCOME - only 'paid'
+    const paymentsArray = Array.isArray(payments) ? payments : [];
+
+    // Log payment details for debugging with penalties
+    if (paymentsArray.length > 0) {
+      paymentsArray.forEach((p, idx) => {
+        let totalPenalty = 0;
+        if (p?.penaltyBreakdown && p.penaltyBreakdown.length > 0) {
+          p.penaltyBreakdown.forEach(item => {
+            if (item.penalty && item.isLate) {
+              totalPenalty += item.penalty;
+            }
           });
-          totalIncome += inc.amount;
-        });
-      } catch (err) {
-        console.error('Error fetching incomes:', err);
-      }
-
-      // Fetch expenditures
-      try {
-        const expendituresResponse = await api.get('/transactions/expenditure/public?limit=100');
-        let expenditures = [];
-        if (expendituresResponse?.data?.data?.records) {
-          expenditures = expendituresResponse.data.data.records;
-        } else if (expendituresResponse?.data?.records) {
-          expenditures = expendituresResponse.data.records;
-        } else if (Array.isArray(expendituresResponse?.data)) {
-          expenditures = expendituresResponse.data;
         }
-        
-        expenditures.forEach(exp => {
-          allTransactions.push({
-            id: exp._id,
-            type: 'expense',
-            amount: exp.amount,
-            date: exp.date,
-            description: exp.description,
-            purpose: exp.purpose,
-            isFromPayment: false
-          });
-          totalExpense += exp.amount;
-        });
-      } catch (err) {
-        console.error('Error fetching expenditures:', err);
-      }
+        const totalAmount = (p?.amount || 0) + totalPenalty;
 
-      // Fetch payments
-      try {
-        const paymentsResponse = await api.get('/payments/all');
-        let payments = [];
-        if (paymentsResponse?.data?.data?.records) {
-          payments = paymentsResponse.data.data.records;
-        } else if (paymentsResponse?.data?.records) {
-          payments = paymentsResponse.data.records;
-        } else if (Array.isArray(paymentsResponse?.data)) {
-          payments = paymentsResponse.data;
-        }
-        
-        const paidPayments = payments.filter(p => p && p.status === 'paid');
-        
-        paidPayments.forEach(payment => {
-          allTransactions.push({
-            id: payment._id,
-            type: 'income',
-            amount: payment.amount,
-            date: payment.paidAt || payment.createdAt,
-            description: payment.description || `${payment.type} payment`,
-            source: `${payment.type?.toUpperCase() || 'Member'} Payment`,
-            isFromPayment: true,
-            paymentType: payment.type
-          });
-          totalIncome += payment.amount;
-        });
-      } catch (err) {
-        console.error('Error fetching payments:', err);
-      }
-
-      // Sort by date (newest first)
-      allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
-      setTransactions(allTransactions);
-      setStats({
-        totalIncome: totalIncome,
-        totalExpense: totalExpense,
-        balance: totalIncome - totalExpense,
-        incomeCount: allTransactions.filter(t => t.type === 'income').length,
-        expenseCount: allTransactions.filter(t => t.type === 'expense').length
-      });
-      
-      console.log('Total transactions loaded:', allTransactions.length);
-      
-    } catch (error) {
-      console.error('Error fetching transactions:', error);
-      toast.error(error.message || 'Failed to load transactions');
-      setTransactions([]);
-    } finally {
-      setLoading(false);
+              });
     }
-  };
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchAllTransactions();
-    setRefreshing(false);
-    toast.success('Data refreshed');
+    const formattedPayments = paymentsArray
+      .filter(payment => {
+        const amount = payment?.amount || 0;
+        if (amount <= 0) return false;
+
+        const status = (payment?.status || '').toLowerCase();
+
+        // â­ ONLY count payments with status === 'paid'
+        // This excludes fine/penalty records (like "6 times you came late")
+        if (status !== 'paid') {
+                    return false;
+        }
+
+        return true;
+      })
+      .map(payment => {
+        let paymentType = 'Member Payment';
+        let paymentDescription = payment?.description || '';
+
+        const paymentName = payment?.name || payment?.paymentType || payment?.source || '';
+
+        if (paymentName.toLowerCase().includes('wedding') || paymentName.toLowerCase().includes('leavy')) {
+          paymentType = 'Wedding Levy';
+        } else if (payment?.type === 'registration' || paymentDescription.toLowerCase().includes('registration')) {
+          paymentType = 'Registration Fee';
+        } else if (payment?.type === 'annual' || paymentDescription.toLowerCase().includes('annual')) {
+          paymentType = 'Annual Dues';
+        } else if (payment?.type === 'event' || paymentDescription.toLowerCase().includes('event')) {
+          paymentType = 'Event Fee';
+        } else if (payment?.type === 'fine' || paymentDescription.toLowerCase().includes('fine')) {
+          paymentType = 'Fine/Penalty';
+        } else if (payment?.type === 'late' || paymentDescription.toLowerCase().includes('late')) {
+          paymentType = 'Late Fee';
+        }
+
+        // â­ Calculate total including penalty
+        let totalPenalty = 0;
+        if (payment?.penaltyBreakdown && payment.penaltyBreakdown.length > 0) {
+          payment.penaltyBreakdown.forEach(item => {
+            if (item.penalty && item.isLate) {
+              totalPenalty += item.penalty;
+            }
+          });
+        }
+        const totalAmount = (payment?.amount || 0) + totalPenalty;
+
+        return {
+          id: payment?._id,
+          type: 'income',
+          subType: 'member_payment',
+          category: paymentType,
+          amount: totalAmount,
+          description: paymentDescription || `${paymentType} payment${totalPenalty > 0 ? ` (includes â‚¦${totalPenalty} penalty)` : ''}`,
+          memberName: payment?.memberName || payment?.name || 'Member',
+          paymentMethod: payment?.paymentMethod || 'Card',
+          date: payment?.date || payment?.paidAt || payment?.createdAt,
+          createdAt: payment?.createdAt,
+          icon: 'CreditCard',
+          isMemberPayment: true,
+          penaltyAmount: totalPenalty > 0 ? totalPenalty : 0,
+          baseAmount: payment?.amount || 0
+        };
+      });
+
+
+    // Combine all transactions
+    const allTransactions = [...formattedIncomes, ...formattedPayments, ...formattedExpenses];
+
+    allTransactions.sort((a, b) => {
+      const dateA = new Date(a.createdAt || a.date || 0);
+      const dateB = new Date(b.createdAt || b.date || 0);
+      return dateB - dateA;
+    });
+
+
+    setTransactions(allTransactions);
+    isProcessingRef.current = false;
   };
 
   const calculateStats = () => {
-    const income = transactions.filter(t => t.type === 'income');
-    const expense = transactions.filter(t => t.type === 'expense');
-    
-    setStats(prev => ({
-      ...prev,
-      incomeCount: income.length,
-      expenseCount: expense.length
-    }));
+    const incomes = transactions.filter(t => t.type === 'income');
+    const expenses = transactions.filter(t => t.type === 'expenditure');
+    const memberPayments = incomes.filter(t => t.subType === 'member_payment');
+    const manualIncomes = incomes.filter(t => t.subType === 'manual_income');
+
+    const totalIncome = incomes.reduce((sum, t) => sum + (t.amount || 0), 0);
+    const totalExpense = expenses.reduce((sum, t) => sum + (t.amount || 0), 0);
+    const totalMemberPayments = memberPayments.reduce((sum, t) => sum + (t.amount || 0), 0);
+    const balance = totalIncome - totalExpense;
+
+
+    setStats({
+      totalIncome: totalIncome,
+      totalExpense: totalExpense,
+      balance: balance,
+      incomeCount: incomes.length,
+      expenseCount: expenses.length,
+      paymentCount: memberPayments.length,
+      totalPayments: totalMemberPayments,
+      manualIncomeCount: manualIncomes.length
+    });
+  };
+
+  const fetchAllTransactions = useCallback(async () => {
+    setRefreshing(true);
+    dataLoadedRef.current = false;
+    isProcessingRef.current = false;
+    await Promise.all([
+      refetchIncomes(),
+      refetchExpenses(),
+      refetchPayments(),
+      refetchSummary()
+    ]);
+    // Small delay to let the data settle
+    setTimeout(() => {
+      dataLoadedRef.current = false;
+      isProcessingRef.current = false;
+      processTransactions();
+      setRefreshing(false);
+    }, 500);
+  }, [refetchIncomes, refetchExpenses, refetchPayments, refetchSummary]);
+
+  const handleRefresh = async () => {
+    await fetchAllTransactions();
+    toast.success('Data refreshed');
   };
 
   const handleAddIncome = async (e) => {
     e.preventDefault();
-    
+
     if (!incomeForm.amount || incomeForm.amount <= 0) {
       toast.error('Please enter a valid amount');
       return;
     }
-    
+
     if (!incomeForm.source) {
       toast.error('Please select a source');
       return;
     }
-    
+
     setModalLoading(true);
-    
+
     try {
       await TransactionService.recordIncome({
         amount: parseFloat(incomeForm.amount),
@@ -238,39 +327,44 @@ const AccountPage = () => {
         date: incomeForm.date,
         description: incomeForm.description
       });
-      
-      toast.success('Income recorded successfully');
+
+      setSuccessData({
+        type: 'income',
+        amount: parseFloat(incomeForm.amount),
+        name: incomeForm.source
+      });
+
       setShowIncomeModal(false);
+      setShowSuccessModal(true);
       setIncomeForm({
         amount: '',
         source: '',
         date: new Date().toISOString().split('T')[0],
         description: ''
       });
-      await fetchAllTransactions();
+
     } catch (error) {
       console.error('Error recording income:', error);
       toast.error(error.message || 'Failed to record income');
-    } finally {
       setModalLoading(false);
     }
   };
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
-    
+
     if (!expenseForm.amount || expenseForm.amount <= 0) {
       toast.error('Please enter a valid amount');
       return;
     }
-    
+
     if (!expenseForm.purpose) {
       toast.error('Please select a purpose');
       return;
     }
-    
+
     setModalLoading(true);
-    
+
     try {
       await TransactionService.recordExpenditure({
         amount: parseFloat(expenseForm.amount),
@@ -278,22 +372,34 @@ const AccountPage = () => {
         date: expenseForm.date,
         description: expenseForm.description
       });
-      
-      toast.success('Expense recorded successfully');
+
+      setSuccessData({
+        type: 'expense',
+        amount: parseFloat(expenseForm.amount),
+        name: expenseForm.purpose
+      });
+
       setShowExpenseModal(false);
+      setShowSuccessModal(true);
       setExpenseForm({
         amount: '',
         purpose: '',
         date: new Date().toISOString().split('T')[0],
         description: ''
       });
-      await fetchAllTransactions();
+
     } catch (error) {
       console.error('Error recording expense:', error);
       toast.error(error.message || 'Failed to record expense');
-    } finally {
       setModalLoading(false);
     }
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setSuccessData({ type: '', amount: 0, name: '' });
+    // Refresh the page entirely to show the new transaction
+    window.location.reload();
   };
 
   const clearFilters = () => {
@@ -308,7 +414,7 @@ const AccountPage = () => {
 
   const getFilteredTransactions = () => {
     let filtered = [...transactions];
-    
+
     if (filter.type !== 'all') {
       filtered = filtered.filter(t => t.type === filter.type);
     }
@@ -320,13 +426,15 @@ const AccountPage = () => {
     }
     if (filter.search) {
       const searchTerm = filter.search.toLowerCase();
-      filtered = filtered.filter(t => 
+      filtered = filtered.filter(t =>
+        (t.category && t.category.toLowerCase().includes(searchTerm)) ||
         (t.source && t.source.toLowerCase().includes(searchTerm)) ||
         (t.purpose && t.purpose.toLowerCase().includes(searchTerm)) ||
-        (t.description && t.description.toLowerCase().includes(searchTerm))
+        (t.description && t.description.toLowerCase().includes(searchTerm)) ||
+        (t.memberName && t.memberName.toLowerCase().includes(searchTerm))
       );
     }
-    
+
     return filtered;
   };
 
@@ -351,49 +459,93 @@ const AccountPage = () => {
     }
   };
 
-  if (loading) {
+  const getTransactionIcon = (transaction) => {
+    if (transaction.type === 'income') {
+      if (transaction.isMemberPayment) {
+        return <CreditCard className="h-4 w-4 text-blue-600" />;
+      }
+      return <TrendingUp className="h-4 w-4 text-blue-600" />;
+    }
+    return <TrendingDown className="h-4 w-4 text-red-600" />;
+  };
+
+  const getTransactionColor = (transaction) => {
+    if (transaction.type === 'income') {
+      return 'bg-blue-100';
+    }
+    return 'bg-red-100';
+  };
+
+  const isLoading = incomeLoading || expenseLoading || paymentsLoading || summaryLoading;
+
+  if (isLoading && transactions.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Navbar />
         <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-500">Loading transactions...</p>
-          </div>
+          <LoadingSpinner />
         </div>
       </div>
     );
   }
 
+  const handleBackToHome = () => {
+    // Navigate based on user role
+    if (isAdmin) {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <Navbar />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+
+
+      <div className="max-w-7xl mx-auto  sm:px-6 lg:px-8  space-y-4">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                <h1 className="font-semibold text-lg">Account Management</h1>
+
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-b-3xl p-4 text-white">
+
+
+
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBackToHome}
+                className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Wallet className="h-5 w-5" />
+                    <h1 className="font-semibold text-lg">Account Management</h1>
+                  </div>
+                  <p className="text-blue-100 text-xs mt-1">Track all financial transactions</p>
+                </div>
+
               </div>
-              <p className="text-blue-100 text-xs mt-1">Track all financial transactions</p>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            </button>
+            <div className="flex items-center gap-2">
+
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+              >
+                <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
 
           {/* Action Buttons - Income and Expense */}
           <div className="grid grid-cols-2 gap-3 mt-4">
             <button
               onClick={() => setShowIncomeModal(true)}
-              className="bg-green-600 text-white py-3 rounded-xl font-medium text-sm hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+              className="bg-cyan-600 text-white py-3 rounded-xl font-medium text-sm hover:bg-cyan-700 transition-colors flex items-center justify-center gap-2"
             >
               <Plus className="h-4 w-4" />
               Add Income
@@ -407,32 +559,48 @@ const AccountPage = () => {
             </button>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats Cards â€” Remodeled: Big Net Balance on right */}
           <div className="grid grid-cols-2 gap-3 mt-4">
-            <div className="bg-white/10 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-blue-100 text-xs">Total Income</p>
-                <TrendingUp className="h-3 w-3 text-green-300" />
+            {/* LEFT: Income + Expenditure stacked */}
+            <div className="col-span-1 space-y-3">
+              {/* Total Income */}
+              <div className="bg-white/10 rounded-xl p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-blue-100 text-xs">Total Income</p>
+                  <TrendingUp className="h-3 w-3 text-cyan-300" />
+                </div>
+                <p className="text-base font-bold text-cyan-300">
+                  {formatCurrency(stats.totalIncome)}
+                </p>
+                <p className="text-xs text-blue-200">{stats.incomeCount} transactions</p>
               </div>
-              <p className="text-base font-bold text-green-300">{formatCurrency(stats.totalIncome)}</p>
-              <p className="text-xs text-blue-200">{stats.incomeCount} transactions</p>
+
+              {/* Total Expenses */}
+              <div className="bg-white/10  rounded-xl p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-blue-100 text-xs">Total Expenses</p>
+                  <TrendingDown className="h-3 w-3 text-red-300" />
+                </div>
+                <p className="text-base font-bold text-red-300">
+                  {formatCurrency(stats.totalExpense)}
+                </p>
+                <p className="text-xs text-blue-200">{stats.expenseCount} transactions</p>
+              </div>
             </div>
-            <div className="bg-white/10 rounded-xl p-3">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-blue-100 text-xs">Total Expenses</p>
-                <TrendingDown className="h-3 w-3 text-red-300" />
-              </div>
-              <p className="text-base font-bold text-red-300">{formatCurrency(stats.totalExpense)}</p>
-              <p className="text-xs text-blue-200">{stats.expenseCount} transactions</p>
-            </div>
-            <div className="bg-white/10 rounded-xl p-3 col-span-2">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-blue-100 text-xs">Net Balance</p>
-                <DollarSign className="h-3 w-3 text-yellow-300" />
-              </div>
-              <p className={`text-lg font-bold ${stats.balance >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+
+            {/* RIGHT: Big Net Balance */}
+            <div className="col-span-1 bg-white/10 rounded-xl p-3 flex flex-col justify-center items-center text-center">
+              <p className="text-blue-100 text-xs mb-2">Net Balance</p>
+              <p
+                className={`text-2xl font-bold leading-tight ${stats.balance >= 0 ? 'text-cyan-300' : 'text-red-300'
+                  }`}
+              >
                 {formatCurrency(stats.balance)}
               </p>
+              {/* <div
+                className={`mt-2 h-2 w-2 rounded-full ${stats.balance >= 0 ? 'bg-cyan-300' : 'bg-red-300'
+                  }`}
+              /> */}
             </div>
           </div>
         </div>
@@ -452,11 +620,10 @@ const AccountPage = () => {
             </div>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`p-2.5 rounded-xl border transition-colors ${
-                showFilters || hasActiveFilters
-                  ? 'bg-blue-50 border-blue-300 text-blue-600'
-                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-              }`}
+              className={`p-2.5 rounded-xl border transition-colors ${showFilters || hasActiveFilters
+                ? 'bg-blue-50 border-blue-300 text-blue-600'
+                : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                }`}
             >
               <Filter className="h-4 w-4" />
             </button>
@@ -472,9 +639,9 @@ const AccountPage = () => {
               >
                 <option value="all">All Types</option>
                 <option value="income">Income Only</option>
-                <option value="expense">Expenses Only</option>
+                <option value="expenditure">Expenses Only</option>
               </select>
-              
+
               <div className="grid grid-cols-2 gap-2">
                 <input
                   type="date"
@@ -526,6 +693,9 @@ const AccountPage = () => {
         {/* Transactions List */}
         <div className="space-y-3">
           <div className="flex justify-between items-center px-1">
+            <p className="text-sm px-2 text-gray-500">
+              Transaction History
+            </p>
             <p className="text-xs text-gray-500">
               {filteredTransactions.length} transaction{filteredTransactions.length !== 1 ? 's' : ''}
             </p>
@@ -537,6 +707,12 @@ const AccountPage = () => {
                 <Wallet className="h-8 w-8 text-gray-400" />
               </div>
               <p className="text-gray-500 text-sm">No transactions found</p>
+              <button
+                onClick={handleRefresh}
+                className="mt-4 text-blue-600 text-sm font-medium"
+              >
+                Refresh Data
+              </button>
             </div>
           ) : (
             filteredTransactions.map((transaction, index) => (
@@ -544,46 +720,49 @@ const AccountPage = () => {
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
-                        transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'
-                      }`}>
-                        {transaction.type === 'income' ? (
-                          transaction.isFromPayment ? (
-                            <CreditCard className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <TrendingUp className="h-4 w-4 text-green-600" />
-                          )
-                        ) : (
-                          <TrendingDown className="h-4 w-4 text-red-600" />
-                        )}
+                      <div className={`h-8 w-8 rounded-full flex items-center justify-center ${getTransactionColor(transaction)}`}>
+                        {getTransactionIcon(transaction)}
                       </div>
                       <div>
                         <p className="font-semibold text-gray-900 text-sm">
-                          {transaction.type === 'income' 
-                            ? (transaction.source || 'Payment Received')
-                            : (transaction.purpose || 'Expense')
-                          }
+                          {transaction.category || (transaction.type === 'income' ? 'Income' : 'Expense')}
                         </p>
                         <p className="text-xs text-gray-400">
                           {formatDate(transaction.date)}
-                          {transaction.isFromPayment && (
-                            <span className="ml-2 text-xs text-blue-500">(Online Payment)</span>
+                          {transaction.isMemberPayment && transaction.memberName && (
+                            <span className="ml-2 text-xs text-gray-500">
+                              by {transaction.memberName}
+                            </span>
+                          )}
+                          {transaction.subType === 'manual_income' && (
+                            <span className="ml-2 text-xs text-cyan-500">
+                              (Manual Entry)
+                            </span>
+                          )}
+                          {/* â­ Show penalty badge */}
+                          {transaction.penaltyAmount > 0 && (
+                            <span className="ml-2 text-xs  text-gray-700 px-1.5 py-0.5 rounded-full">
+                              +â‚¦{transaction.penaltyAmount} penalty
+                            </span>
                           )}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold text-base ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`font-bold text-base ${transaction.type === 'income' ? 'text-blue-600' : 'text-red-600'}`}>
                         {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                       </p>
-                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${
-                        transaction.type === 'income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                      }`}>
-                        {transaction.type === 'income' ? (transaction.isFromPayment ? 'Payment' : 'Income') : 'Expense'}
+                      <span className={`inline-block text-xs px-2 py-0.5 rounded-full ${transaction.type === 'income'
+                        ? (transaction.isMemberPayment ? ' text-gray-700' : ' text-gray-700')
+                        : 'text-red-700'
+                        }`}>
+                        {transaction.type === 'income'
+                          ? (transaction.isMemberPayment ? 'Member Payment' : 'Income')
+                          : 'Expense'}
                       </span>
                     </div>
                   </div>
-                  
+
                   {transaction.description && (
                     <p className="text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
                       {transaction.description}
@@ -592,6 +771,7 @@ const AccountPage = () => {
                 </div>
               </div>
             ))
+
           )}
         </div>
       </div>
@@ -599,24 +779,24 @@ const AccountPage = () => {
       {/* Add Income Modal */}
       {showIncomeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-md animate-slide-up">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-md">
             <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-green-600" />
+                <TrendingUp className="h-5 w-5 text-blue-600" />
                 <h3 className="font-semibold text-gray-900">Add Income</h3>
               </div>
               <button onClick={() => setShowIncomeModal(false)} className="p-1 hover:bg-gray-100 rounded-full">
                 <X className="h-5 w-5 text-gray-400" />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddIncome} className="p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Source *</label>
                 <select
                   value={incomeForm.source}
                   onChange={(e) => setIncomeForm(prev => ({ ...prev, source: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                   required
                 >
                   <option value="">Select source</option>
@@ -625,9 +805,9 @@ const AccountPage = () => {
                   ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₦) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (â‚¦) *</label>
                 <input
                   type="number"
                   value={incomeForm.amount}
@@ -635,22 +815,22 @@ const AccountPage = () => {
                   placeholder="0.00"
                   min="0"
                   step="0.01"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
                 <input
                   type="date"
                   value={incomeForm.date}
                   onChange={(e) => setIncomeForm(prev => ({ ...prev, date: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
@@ -658,10 +838,10 @@ const AccountPage = () => {
                   onChange={(e) => setIncomeForm(prev => ({ ...prev, description: e.target.value }))}
                   rows="3"
                   placeholder="Optional description"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 resize-none"
                 />
               </div>
-              
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -673,7 +853,7 @@ const AccountPage = () => {
                 <button
                   type="submit"
                   disabled={modalLoading}
-                  className="flex-1 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 disabled:opacity-50"
+                  className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50"
                 >
                   {modalLoading ? 'Saving...' : 'Save Income'}
                 </button>
@@ -686,7 +866,7 @@ const AccountPage = () => {
       {/* Add Expense Modal */}
       {showExpenseModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-md animate-slide-up">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-md">
             <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-red-600" />
@@ -696,7 +876,7 @@ const AccountPage = () => {
                 <X className="h-5 w-5 text-gray-400" />
               </button>
             </div>
-            
+
             <form onSubmit={handleAddExpense} className="p-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Purpose *</label>
@@ -712,9 +892,9 @@ const AccountPage = () => {
                   ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₦) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (â‚¦) *</label>
                 <input
                   type="number"
                   value={expenseForm.amount}
@@ -726,7 +906,7 @@ const AccountPage = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
                 <input
@@ -737,7 +917,7 @@ const AccountPage = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                 <textarea
@@ -748,7 +928,7 @@ const AccountPage = () => {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 resize-none"
                 />
               </div>
-              
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="button"
@@ -770,15 +950,36 @@ const AccountPage = () => {
         </div>
       )}
 
-      <style jsx>{`
-        @keyframes slide-up {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        .animate-slide-up {
-          animation: slide-up 0.3s ease-out;
-        }
-      `}</style>
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-end md:items-center justify-center z-50">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl w-full max-w-md text-center">
+            <div className={`p-6 ${successData.type === 'income' ? 'bg-blue-50' : 'bg-red-50'} rounded-t-2xl`}>
+              <div className={`inline-flex items-center justify-center w-16 h-16 ${successData.type === 'income' ? 'bg-blue-100' : 'bg-red-100'} rounded-full mb-4`}>
+                <CheckCircle className={`h-8 w-8 ${successData.type === 'income' ? 'text-blue-600' : 'text-red-600'}`} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {successData.type === 'income' ? 'Income Added!' : 'Expense Added!'}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                {successData.type === 'income' ? 'Source:' : 'Purpose:'} {successData.name}
+              </p>
+              <p className="text-xl font-bold text-gray-800 mt-2">
+                {formatCurrency(successData.amount)}
+              </p>
+            </div>
+
+            <div className="p-6">
+              <button
+                onClick={handleCloseSuccessModal}
+                className="w-full py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
