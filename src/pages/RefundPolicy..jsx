@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Shield, 
-  Lock, 
+import {
+  ArrowRight,
+  Shield,
+  Lock,
   FileText,
   Clock,
   CreditCard,
@@ -69,7 +69,7 @@ const RefundPolicy = () => {
                 Finlight
               </span>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-6">
               <button onClick={() => navigate('/')} className="text-gray-300 hover:text-cyan-400 transition-colors flex items-center gap-1">
                 <Home className="h-4 w-4" />
@@ -88,7 +88,7 @@ const RefundPolicy = () => {
                 Print
               </button>
             </div>
-            
+
             <button
               onClick={() => navigate('/')}
               className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all flex items-center gap-2"
@@ -165,7 +165,7 @@ const RefundPolicy = () => {
                 >
                   {section.icon}
                   <span className="hidden sm:inline">{section.title}</span>
-                  <span className="sm:hidden">{section.title.split(' ').slice(0,2).join(' ')}</span>
+                  <span className="sm:hidden">{section.title.split(' ').slice(0, 2).join(' ')}</span>
                 </a>
               ))}
             </div>
@@ -176,8 +176,8 @@ const RefundPolicy = () => {
             {/* Introduction */}
             <div className="mb-8 pb-6 border-b border-gray-800">
               <p className="text-gray-400 leading-relaxed mb-4">
-                At Finlight ("we," "our," or "us"), we strive to ensure complete satisfaction with our services. 
-                This Refund Policy outlines the circumstances under which refunds may be issued for payments made 
+                At Finlight ("we," "our," or "us"), we strive to ensure complete satisfaction with our services.
+                This Refund Policy outlines the circumstances under which refunds may be issued for payments made
                 through our platform.
               </p>
               <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
@@ -204,7 +204,7 @@ const RefundPolicy = () => {
                 <li>Custom feature development and setup fees</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                By using Finlight, you acknowledge that you have read, understood, and agree to this Refund Policy. 
+                By using Finlight, you acknowledge that you have read, understood, and agree to this Refund Policy.
                 If you do not agree with any part of this policy, please discontinue use of our services.
               </p>
             </div>
@@ -215,7 +215,7 @@ const RefundPolicy = () => {
                 <CreditCard className="h-5 w-5 text-cyan-400" />
                 2. Subscription Plan Refunds
               </h2>
-              
+
               <div className="space-y-4 mt-3">
                 <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
@@ -223,8 +223,8 @@ const RefundPolicy = () => {
                     <h3 className="font-semibold text-green-400">14-Day Money-Back Guarantee</h3>
                   </div>
                   <p className="text-gray-400 text-sm">
-                    We offer a full refund on subscription fees if you cancel within 14 days of your initial 
-                    subscription purchase, provided you have not extensively used the platform's premium features. 
+                    We offer a full refund on subscription fees if you cancel within 14 days of your initial
+                    subscription purchase, provided you have not extensively used the platform's premium features.
                     This applies to the first subscription only.
                   </p>
                 </div>
@@ -232,8 +232,8 @@ const RefundPolicy = () => {
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-2">Pro-rated Refunds</h3>
                   <p className="text-gray-400 text-sm">
-                    For cancellations after the 14-day period, refunds may be issued on a pro-rated basis for the 
-                    unused portion of your subscription term. The minimum refund amount is ₦5,000 or 10% of the 
+                    For cancellations after the 14-day period, refunds may be issued on a pro-rated basis for the
+                    unused portion of your subscription term. The minimum refund amount is â‚¦5,000 or 10% of the
                     subscription fee, whichever is higher.
                   </p>
                 </div>
@@ -241,7 +241,7 @@ const RefundPolicy = () => {
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-2">Annual Subscriptions</h3>
                   <p className="text-gray-400 text-sm">
-                    Annual subscription cancellations are eligible for pro-rated refunds based on remaining full 
+                    Annual subscription cancellations are eligible for pro-rated refunds based on remaining full
                     months. A 10% administrative fee may apply to process the refund.
                   </p>
                 </div>
@@ -255,11 +255,11 @@ const RefundPolicy = () => {
                 3. Member Dues & Contribution Refunds
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                Refunds for member dues and contributions are governed by your organization's internal policies. 
-                Finlight provides the technical means to process refunds, but the decision to refund rests with 
+                Refunds for member dues and contributions are governed by your organization's internal policies.
+                Finlight provides the technical means to process refunds, but the decision to refund rests with
                 the organization administrator.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                 <div className="bg-gray-800/30 rounded-xl p-3">
                   <div className="flex items-center gap-2 mb-1">
@@ -304,7 +304,7 @@ const RefundPolicy = () => {
               <p className="text-gray-400 leading-relaxed mb-3">
                 Refund processing times vary depending on the original payment method:
               </p>
-              
+
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="border-b border-gray-800">
@@ -338,7 +338,7 @@ const RefundPolicy = () => {
                   </tbody>
                 </table>
               </div>
-              
+
               <p className="text-gray-400 text-sm mt-3">
                 <strong className="text-cyan-400">Note:</strong> All timeframes are estimates. Actual refund times may vary based on payment processor and financial institution processing times.
               </p>
@@ -353,7 +353,7 @@ const RefundPolicy = () => {
               <p className="text-gray-400 leading-relaxed mb-3">
                 To request a refund, please follow these steps:
               </p>
-              
+
               <div className="space-y-3 mt-3">
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-cyan-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -361,10 +361,10 @@ const RefundPolicy = () => {
                   </div>
                   <div>
                     <h3 className="font-medium text-white">Submit a Refund Request</h3>
-                    <p className="text-gray-400 text-sm">Contact our support team via email at <span className="text-cyan-400">refunds@finlight.com</span> or through the in-app support feature.</p>
+                    <p className="text-gray-400 text-sm">Contact our support team via email at <span className="text-cyan-400">Zephcoredigital@Zephcoredigital.ng</span> or through the in-app support feature.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-cyan-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-cyan-400 text-xs font-bold">2</span>
@@ -374,7 +374,7 @@ const RefundPolicy = () => {
                     <p className="text-gray-400 text-sm">Include your transaction ID, payment date, amount, and reason for refund request. Attach any relevant documentation.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-cyan-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-cyan-400 text-xs font-bold">3</span>
@@ -384,7 +384,7 @@ const RefundPolicy = () => {
                     <p className="text-gray-400 text-sm">Our team will review your request within 3-5 business days. You will receive a confirmation email once reviewed.</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <div className="w-6 h-6 bg-cyan-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                     <span className="text-cyan-400 text-xs font-bold">4</span>
@@ -425,28 +425,28 @@ const RefundPolicy = () => {
               <p className="text-gray-400 leading-relaxed mb-3">
                 In the event of a dispute regarding a refund, the following process applies:
               </p>
-              
+
               <div className="space-y-3 mt-3">
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-2">Step 1: Internal Review</h3>
                   <p className="text-gray-400 text-sm">
-                    Submit a detailed explanation of your dispute to <span className="text-cyan-400">disputes@finlight.com</span>. 
+                    Submit a detailed explanation of your dispute to <span className="text-cyan-400">Zephcoredigital@Zephcoredigital.ng</span>.
                     Our team will conduct a thorough review and respond within 7 business days.
                   </p>
                 </div>
-                
+
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-2">Step 2: Escalation</h3>
                   <p className="text-gray-400 text-sm">
-                    If the dispute remains unresolved, you may escalate to our management team. Provide all 
+                    If the dispute remains unresolved, you may escalate to our management team. Provide all
                     relevant documentation and communication history.
                   </p>
                 </div>
-                
+
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-2">Step 3: Third-Party Mediation</h3>
                   <p className="text-gray-400 text-sm">
-                    For disputes involving significant amounts (₦100,000+), both parties agree to first attempt 
+                    For disputes involving significant amounts (â‚¦100,000+), both parties agree to first attempt
                     mediation through a mutually agreed-upon mediator in Lagos, Nigeria, before pursuing legal action.
                   </p>
                 </div>
@@ -459,31 +459,31 @@ const RefundPolicy = () => {
                 <HelpCircle className="h-5 w-5 text-cyan-400" />
                 8. Special Circumstances
               </h2>
-              
+
               <div className="space-y-3">
                 <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4">
                   <h3 className="font-semibold text-green-400 mb-1">Service Outage Refunds</h3>
                   <p className="text-gray-400 text-sm">
-                    In the event of a significant service outage (downtime exceeding 48 consecutive hours), 
-                    affected users may be eligible for a credit equivalent to the downtime period. Credits will 
+                    In the event of a significant service outage (downtime exceeding 48 consecutive hours),
+                    affected users may be eligible for a credit equivalent to the downtime period. Credits will
                     be automatically applied to the next billing cycle.
                   </p>
                 </div>
-                
+
                 <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
                   <h3 className="font-semibold text-amber-400 mb-1">Fraudulent Transactions</h3>
                   <p className="text-gray-400 text-sm">
-                    If you identify an unauthorized or fraudulent transaction on your account, please notify us 
-                    immediately at <span className="text-cyan-400">security@finlight.com</span>. We will investigate and 
+                    If you identify an unauthorized or fraudulent transaction on your account, please notify us
+                    immediately at <span className="text-cyan-400">Zephcoredigital@Zephcoredigital.ng</span>. We will investigate and
                     issue a full refund upon verification of the fraudulent activity.
                   </p>
                 </div>
-                
+
                 <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-1">Chargebacks</h3>
                   <p className="text-gray-400 text-sm">
-                    If you initiate a chargeback with your bank or credit card company, your Finlight account may 
-                    be suspended pending investigation. We encourage you to contact us first to resolve any issues 
+                    If you initiate a chargeback with your bank or credit card company, your Finlight account may
+                    be suspended pending investigation. We encourage you to contact us first to resolve any issues
                     before initiating a chargeback.
                   </p>
                 </div>
@@ -497,7 +497,7 @@ const RefundPolicy = () => {
                 9. Contact Us for Refund Questions
               </h2>
               <p className="text-gray-400 leading-relaxed mb-4">
-                If you have questions about this Refund Policy or need assistance with a refund request, 
+                If you have questions about this Refund Policy or need assistance with a refund request,
                 please contact our support team:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -506,8 +506,7 @@ const RefundPolicy = () => {
                     <Mail className="h-4 w-4 text-cyan-400" />
                     <span className="font-medium">Refund Requests</span>
                   </p>
-                  <p className="text-sm text-gray-400">refunds@finlight.com</p>
-                  <p className="text-sm text-gray-400">support@finlight.com</p>
+                  <p className="text-sm text-gray-400">Zephcoredigital@Zephcoredigital.ng</p>
                 </div>
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <p className="flex items-center gap-2 text-gray-300 mb-2">
@@ -524,7 +523,7 @@ const RefundPolicy = () => {
                   </p>
                   <p className="text-sm text-gray-400">
                     Finlight Dispute Resolution Department<br />
-                    Lagos, Nigeria
+                    Imo, Nigeria
                   </p>
                 </div>
               </div>
@@ -536,11 +535,11 @@ const RefundPolicy = () => {
                 <button onClick={() => navigate('/terms')} className="text-gray-500 hover:text-cyan-400 transition-colors">
                   Terms & Conditions
                 </button>
-                <span className="text-gray-700">•</span>
+                <span className="text-gray-700">â€¢</span>
                 <button onClick={() => navigate('/privacy')} className="text-gray-500 hover:text-cyan-400 transition-colors">
                   Privacy Policy
                 </button>
-                <span className="text-gray-700">•</span>
+                <span className="text-gray-700">â€¢</span>
                 <button onClick={handlePrint} className="text-gray-500 hover:text-cyan-400 transition-colors">
                   Print This Policy
                 </button>
@@ -549,7 +548,7 @@ const RefundPolicy = () => {
                 This Refund Policy is subject to change without prior notice. Please review it periodically.
               </p>
               <p className="text-xs text-gray-600 mt-2">
-                © {new Date().getFullYear()} Finlight. All rights reserved.
+                Â© {new Date().getFullYear()} Finlight. All rights reserved.
               </p>
             </div>
           </div>

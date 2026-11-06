@@ -11,33 +11,33 @@ const StatsCard = ({ title, value, icon: Icon, color = 'blue', subtitle, trend, 
   }, []);
 
   const colors = {
-    blue: { 
-      bg: '#EFF6FF', 
-      text: '#1D4ED8', 
+    blue: {
+      bg: '#EFF6FF',
+      text: '#1D4ED8',
       icon: '#2563EB',
       light: '#DBEAFE'
     },
-    green: { 
-      bg: '#F0FDF4', 
-      text: '#166534', 
+    green: {
+      bg: '#F0FDF4',
+      text: '#166534',
       icon: '#16A34A',
       light: '#DCFCE7'
     },
-    red: { 
-      bg: '#FEF2F2', 
-      text: '#991B1B', 
+    red: {
+      bg: '#FEF2F2',
+      text: '#991B1B',
       icon: '#DC2626',
       light: '#FEE2E2'
     },
-    yellow: { 
-      bg: '#FEFCE8', 
-      text: '#854D0E', 
+    yellow: {
+      bg: '#FEFCE8',
+      text: '#854D0E',
       icon: '#EAB308',
       light: '#FEF9C3'
     },
-    purple: { 
-      bg: '#FAF5FF', 
-      text: '#6B21A5', 
+    purple: {
+      bg: '#FAF5FF',
+      text: '#6B21A5',
       icon: '#9333EA',
       light: '#F3E8FF'
     }
@@ -49,12 +49,12 @@ const StatsCard = ({ title, value, icon: Icon, color = 'blue', subtitle, trend, 
     if (typeof val === 'string') return val;
     if (typeof val === 'number') {
       if (val >= 1000000) {
-        return `₦${(val / 1000000).toFixed(1)}M`;
+        return `â‚¦${(val / 1000000).toFixed(1)}M`;
       }
       if (val >= 1000) {
-        return `₦${(val / 1000).toFixed(1)}K`;
+        return `â‚¦${(val / 1000).toFixed(1)}K`;
       }
-      return `₦${val.toLocaleString()}`;
+      return `â‚¦${val.toLocaleString()}`;
     }
     return val;
   };
@@ -65,7 +65,7 @@ const StatsCard = ({ title, value, icon: Icon, color = 'blue', subtitle, trend, 
       <div className="bg-white rounded-2xl shadow-sm p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div 
+            <div
               className="h-10 w-10 rounded-xl flex items-center justify-center"
               style={{ backgroundColor: colorStyle.bg }}
             >
@@ -117,14 +117,14 @@ const StatsCard = ({ title, value, icon: Icon, color = 'blue', subtitle, trend, 
             <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
           )}
         </div>
-        <div 
+        <div
           className="h-10 w-10 rounded-xl flex items-center justify-center"
           style={{ backgroundColor: colorStyle.bg }}
         >
           <Icon style={{ height: '20px', width: '20px', color: colorStyle.icon }} />
         </div>
       </div>
-      
+
       {trend && (
         <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
           {trend > 0 ? (
@@ -150,9 +150,9 @@ const StatsCard = ({ title, value, icon: Icon, color = 'blue', subtitle, trend, 
       {color === 'blue' && typeof value === 'number' && value > 0 && (
         <div className="mt-3">
           <div className="w-full bg-gray-100 rounded-full h-1">
-            <div 
+            <div
               className="rounded-full h-1 transition-all duration-500"
-              style={{ 
+              style={{
                 width: `${Math.min(100, (value / 10000) * 100)}%`,
                 backgroundColor: colorStyle.icon
               }}

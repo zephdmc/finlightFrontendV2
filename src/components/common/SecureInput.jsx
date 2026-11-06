@@ -1,25 +1,25 @@
 import { useState } from 'react';
 import { sanitizeInput } from '../../config/security';
 
-const SecureInput = ({ 
-  type = 'text', 
-  name, 
-  value, 
-  onChange, 
-  placeholder, 
+const SecureInput = ({
+  type = 'text',
+  name,
+  value,
+  onChange,
+  placeholder,
   required = false,
   maxLength = 255,
   pattern,
-  ...props 
+  ...props
 }) => {
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
     let newValue = e.target.value;
-    
+
     // Sanitize input
     newValue = sanitizeInput(newValue);
-    
+
     // Validate based on type
     if (type === 'email') {
       const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
@@ -43,7 +43,7 @@ const SecureInput = ({
     } else {
       setError('');
     }
-    
+
     onChange({ target: { name, value: newValue } });
   };
 

@@ -6,7 +6,7 @@ const encrypt = (data) => {
     // This is a simple base64 encoding for demo
     return btoa(JSON.stringify(data));
   };
-  
+
   const decrypt = (encryptedData) => {
     try {
       return JSON.parse(atob(encryptedData));
@@ -14,7 +14,7 @@ const encrypt = (data) => {
       return null;
     }
   };
-  
+
   export const secureStorage = {
     setItem: (key, value) => {
       try {
@@ -24,7 +24,7 @@ const encrypt = (data) => {
         console.error('Error saving to secure storage:', error);
       }
     },
-    
+
     getItem: (key) => {
       try {
         const encrypted = localStorage.getItem(key);
@@ -35,11 +35,11 @@ const encrypt = (data) => {
         return null;
       }
     },
-    
+
     removeItem: (key) => {
       localStorage.removeItem(key);
     },
-    
+
     clear: () => {
       localStorage.clear();
     }

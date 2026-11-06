@@ -15,7 +15,7 @@ const MONTH_KEYS = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', 
 
 const PaymentTypeReport = ({ dateRange, isMobile }) => {
   // ============================================================
-  // STATE Ã¢â‚¬â€ EXISTING
+  // STATE  EXISTING
   // ============================================================
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [selectedPaymentType, setSelectedPaymentType] = useState(null);
@@ -39,7 +39,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
   });
 
   // ============================================================
-  // STATE Ã¢â‚¬â€ NEW: DUES MODAL
+  // STATE  NEW: DUES MODAL
   // ============================================================
   const [showDuesModal, setShowDuesModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -172,7 +172,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
 
 
         // Ã¢Â­Â Diagnostic: show all paymentTypeIds
-              } catch (err) {
+      } catch (err) {
         console.error('Ã¢ÂÅ’ Failed to fetch /payments/all:', err.message);
         allPayments = [];
       }
@@ -204,7 +204,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
 
 
       // ============================================================
-      // 4. Build matrix Ã¢â‚¬â€ one row per member, one column per month
+      // 4. Build matrix  one row per member, one column per month
       // ============================================================
       const matrix = allMembers.map(member => {
         const memberId = member._id || member.id;
@@ -503,7 +503,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
   };
 
   // ============================================================
-  // HANDLE SELECTION Ã¢â‚¬â€ branch on dues type
+  // HANDLE SELECTION  branch on dues type
   // ============================================================
   const handlePaymentTypeSelect = async (paymentType) => {
     if (!paymentType || !paymentType._id) return;
@@ -525,7 +525,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
   };
 
   // ============================================================
-  // EXPORT Ã¢â‚¬â€ EXISTING (non-dues)
+  // EXPORT  EXISTING (non-dues)
   // ============================================================
   const exportToPDF = () => {
     const currentMembers = viewMode === 'outstanding' ? outstandingMembers : paidMembers;
@@ -555,7 +555,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
         if (member.isPartial) {
           statusColumn = `<td style="padding: 8px; border: 1px solid #ddd;">
             <span style="background: #ff9800; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px;">Partial</span>
-            <span style="font-size: 10px; color: #666; display: block;">Ã¢â€šÂ¦${(member.paidAmount || 0).toLocaleString()} paid</span>
+            <span style="font-size: 10px; color: #666; display: block;">${(member.paidAmount || 0).toLocaleString()} paid</span>
           </td>`;
         } else {
           statusColumn = `<td style="padding: 8px; border: 1px solid #ddd;">
@@ -586,8 +586,8 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
         ${viewMode === 'outstanding' ? statusColumn : ''}
         ${viewMode === 'paid' ? paymentDateColumn : ''}
         <td style="padding: 8px; border: 1px solid #ddd; text-align: right; font-weight: bold; font-size: 12px; color: ${viewMode === 'paid' ? '#2e7d32' : '#c62828'};">
-          Ã¢â€šÂ¦${displayAmount.toLocaleString()}
-          ${member.isPartial && viewMode === 'paid' ? `<div style="font-size: 9px; color: #666; font-weight: normal;">Total: Ã¢â€šÂ¦${(member.totalAmount || 0).toLocaleString()}</div>` : ''}
+          ${displayAmount.toLocaleString()}
+          ${member.isPartial && viewMode === 'paid' ? `<div style="font-size: 9px; color: #666; font-weight: normal;">Total: ${(member.totalAmount || 0).toLocaleString()}</div>` : ''}
         </td>
       </tr>
     `;
@@ -620,7 +620,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
     <body>
       <div class="header">
         <div class="title">${viewMode === 'outstanding' ? "Members Who Haven't Paid Fully" : 'Members Who Paid'} - ${summary.paymentTypeName}</div>
-        <div class="subtitle">Payment Type: ${summary.paymentTypeName} | Amount: Ã¢â€šÂ¦${(summary.paymentTypeAmount || 0).toLocaleString()}</div>
+        <div class="subtitle">Payment Type: ${summary.paymentTypeName} | Amount: ${(summary.paymentTypeAmount || 0).toLocaleString()}</div>
         <div class="subtitle">Generated on: ${currentDate} | Total Members: ${currentMembers.length}</div>
       </div>
       <table>
@@ -641,7 +641,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
               <strong>Total ${viewMode === 'paid' ? 'Collected' : 'Remaining'}:</strong>
             </td>
             <td style="text-align: right; font-size: 12px; font-weight: bold; color: ${viewMode === 'paid' ? '#2e7d32' : '#c62828'};">
-              Ã¢â€šÂ¦${totalAmount.toLocaleString()}
+              ${totalAmount.toLocaleString()}
             </td>
           </tr>
         </tfoot>
@@ -678,7 +678,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
     let bodyRows = duesMatrix.map((row, i) => {
       const monthCells = MONTH_KEYS.map(
         k => `<td style="padding:6px;border:1px solid #ddd;text-align:right;font-size:10px;">
-          ${row.months[k] > 0 ? 'Ã¢â€šÂ¦' + row.months[k].toLocaleString() : '-'}
+          ${row.months[k] > 0 ? '' + row.months[k].toLocaleString() : '-'}
         </td>`
       ).join('');
 
@@ -688,14 +688,14 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
           <td style="padding:6px;border:1px solid #ddd;font-weight:bold;font-size:10px;">${row.name}</td>
           ${monthCells}
           <td style="padding:6px;border:1px solid #ddd;text-align:right;font-weight:bold;font-size:10px;color:#1e40af;">
-            Ã¢â€šÂ¦${row.total.toLocaleString()}
+            ${row.total.toLocaleString()}
           </td>
         </tr>`;
     }).join('');
 
     const totalsCells = MONTH_KEYS.map(
       k => `<td style="padding:6px;border:1px solid #ddd;text-align:right;font-weight:bold;font-size:10px;background:#f5f5f5;">
-        Ã¢â€šÂ¦${(duesSummary.monthTotals[k] || 0).toLocaleString()}
+        ${(duesSummary.monthTotals[k] || 0).toLocaleString()}
       </td>`
     ).join('');
 
@@ -703,7 +703,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Dues Report Ã¢â‚¬â€ ${duesSummary.year}</title>
+      <title>Dues Report  ${duesSummary.year}</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 12px; }
         .title { text-align:center; font-size:18px; font-weight:bold; color:#1e40af; }
@@ -712,8 +712,8 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
       </style>
     </head>
     <body>
-      <div class="title">Dues Report Ã¢â‚¬â€ ${duesSummary.paymentTypeName}</div>
-      <div class="subtitle">Year: ${duesSummary.year} | Members: ${duesSummary.memberCount} | Grand Total: Ã¢â€šÂ¦${duesSummary.grandTotal.toLocaleString()}</div>
+      <div class="title">Dues Report  ${duesSummary.paymentTypeName}</div>
+      <div class="subtitle">Year: ${duesSummary.year} | Members: ${duesSummary.memberCount} | Grand Total: ${duesSummary.grandTotal.toLocaleString()}</div>
       <div class="subtitle">Generated: ${currentDate}</div>
       <table>
         <thead>
@@ -729,7 +729,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
             <td colspan="2" style="padding:6px;border:1px solid #ddd;text-align:right;font-weight:bold;font-size:10px;background:#f5f5f5;">TOTALS</td>
             ${totalsCells}
             <td style="padding:6px;border:1px solid #ddd;text-align:right;font-weight:bold;font-size:10px;background:#1e40af;color:white;">
-              Ã¢â€šÂ¦${duesSummary.grandTotal.toLocaleString()}
+              ${duesSummary.grandTotal.toLocaleString()}
             </td>
           </tr>
         </tfoot>
@@ -820,7 +820,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                 </div>
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-sm font-bold text-blue-600">
-                    Ã¢â€šÂ¦{(type.amount || 0).toLocaleString()}
+                    {(type.amount || 0).toLocaleString()}
                   </p>
                   <p className="text-[9px] text-gray-500 mt-0.5">
                     {type.frequency || 'One-time'}
@@ -857,10 +857,10 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                 </button>
                 <div className="min-w-0">
                   <h3 className="font-semibold text-gray-800 text-sm truncate">
-                    {duesSummary.paymentTypeName} Ã¢â‚¬â€ Dues Report
+                    {duesSummary.paymentTypeName}  Dues Report
                   </h3>
                   <p className="text-[10px] text-gray-500 truncate">
-                    Ã¢â€šÂ¦{duesSummary.paymentTypeAmount.toLocaleString()} / month Ã¢â‚¬Â¢{' '}
+                    {duesSummary.paymentTypeAmount.toLocaleString()} / month{' '}
                     {duesSummary.memberCount} members
                   </p>
                 </div>
@@ -899,7 +899,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                 <span className="text-gray-600">
                   Grand Total:{' '}
                   <span className="font-bold text-blue-700">
-                    Ã¢â€šÂ¦{duesSummary.grandTotal.toLocaleString()}
+                    {duesSummary.grandTotal.toLocaleString()}
                   </span>
                 </span>
                 <span className="text-gray-600">
@@ -917,7 +917,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
               </div>
             </div>
 
-            {/* Body Ã¢â‚¬â€ matrix table */}
+            {/* Body  matrix table */}
             <div className="flex-1 overflow-auto p-2">
               {loadingDues ? (
                 <div className="py-12 text-center">
@@ -973,12 +973,12 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                                 className={`px-1 py-1 text-center border border-gray-100 ${isPaid ? 'text-blue-700 font-semibold' : 'text-gray-300'
                                   }`}
                               >
-                                {isPaid ? `Ã¢â€šÂ¦${v.toLocaleString()}` : 'Ã¢â‚¬â€œ'}
+                                {isPaid ? `${v.toLocaleString()}` : ''}
                               </td>
                             );
                           })}
                           <td className="px-1.5 py-1 text-right font-bold text-blue-700 border border-gray-100 bg-blue-50/50">
-                            Ã¢â€šÂ¦{row.total.toLocaleString()}
+                            {row.total.toLocaleString()}
                           </td>
                         </tr>
                       ))}
@@ -996,11 +996,11 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                             key={k}
                             className="px-1 py-1.5 text-center font-bold text-gray-800 border border-gray-200"
                           >
-                            Ã¢â€šÂ¦{(duesSummary.monthTotals[k] || 0).toLocaleString()}
+                            {(duesSummary.monthTotals[k] || 0).toLocaleString()}
                           </td>
                         ))}
                         <td className="px-1.5 py-1.5 text-right font-bold text-white bg-blue-700 border border-blue-700">
-                          Ã¢â€šÂ¦{duesSummary.grandTotal.toLocaleString()}
+                          {duesSummary.grandTotal.toLocaleString()}
                         </td>
                       </tr>
                     </tfoot>
@@ -1032,7 +1032,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                     {summary.paymentTypeName}
                   </h3>
                   <p className="text-[10px] text-gray-500 truncate">
-                    Ã¢â€šÂ¦{(summary.paymentTypeAmount || 0).toLocaleString()} Ã¢â‚¬Â¢{' '}
+                    {(summary.paymentTypeAmount || 0).toLocaleString()} {' '}
                     {outstandingMembers.length + paidMembers.length} members
                   </p>
                 </div>
@@ -1064,7 +1064,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                   <p className="text-[9px] text-gray-500">Paid</p>
                   <p className="text-sm font-bold text-blue-600">{summary.paidCount}</p>
                   <p className="text-[8px] text-blue-500">
-                    Ã¢â€šÂ¦{summary.totalPaidAmount.toLocaleString()}
+                    {summary.totalPaidAmount.toLocaleString()}
                   </p>
                 </div>
                 <div className="bg-orange-50 rounded-lg p-2 text-center">
@@ -1073,7 +1073,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                     {summary.partialCount}
                   </p>
                   <p className="text-[8px] text-orange-500">
-                    Ã¢â€šÂ¦{summary.totalRemainingAmount.toLocaleString()}
+                    {summary.totalRemainingAmount.toLocaleString()}
                   </p>
                 </div>
                 <div className="bg-red-50 rounded-lg p-2 text-center">
@@ -1082,7 +1082,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                     {outstandingMembers.filter((m) => !m.isPartial).length}
                   </p>
                   <p className="text-[8px] text-red-500">
-                    Ã¢â€šÂ¦
+
                     {outstandingMembers
                       .filter((m) => !m.isPartial)
                       .reduce((sum, m) => sum + (m.remainingAmount || 0), 0)
@@ -1125,11 +1125,11 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                     <span className="font-medium">{summary.partialCount}</span> member(s)
                     have partial payments
                     {viewMode === 'outstanding'
-                      ? ` Ã¢â‚¬Â¢ Remaining: Ã¢â€šÂ¦${outstandingMembers
+                      ? ` Remaining: ${outstandingMembers
                         .filter((m) => m.isPartial)
                         .reduce((sum, m) => sum + (m.remainingAmount || 0), 0)
                         .toLocaleString()}`
-                      : ` Ã¢â‚¬Â¢ Paid: Ã¢â€šÂ¦${paidMembers
+                      : ` Paid: ${paidMembers
                         .filter((m) => m.isPartial)
                         .reduce((sum, m) => sum + (m.amount || 0), 0)
                         .toLocaleString()}`}
@@ -1217,7 +1217,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                                 <td className="px-2 py-1.5">
                                   {isPartial ? (
                                     <span className="text-[8px] bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full">
-                                      Ã¢â€šÂ¦{member.paidAmount.toLocaleString()} paid
+                                      {member.paidAmount.toLocaleString()} paid
                                     </span>
                                   ) : (
                                     <span className="text-[8px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">
@@ -1241,10 +1241,10 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                                   : 'text-blue-600'
                                   }`}
                               >
-                                Ã¢â€šÂ¦{displayAmount.toLocaleString()}
+                                {displayAmount.toLocaleString()}
                                 {isPartial && viewMode === 'paid' && (
                                   <span className="block text-[7px] text-gray-400">
-                                    of Ã¢â€šÂ¦{member.totalAmount.toLocaleString()}
+                                    of {member.totalAmount.toLocaleString()}
                                   </span>
                                 )}
                               </td>
@@ -1278,7 +1278,7 @@ const PaymentTypeReport = ({ dateRange, isMobile }) => {
                               : 'text-blue-600'
                               }`}
                           >
-                            Ã¢â€šÂ¦{currentTotal.toLocaleString()}
+                            {currentTotal.toLocaleString()}
                           </td>
                         </tr>
                       </tfoot>

@@ -7,7 +7,6 @@ const SecurityAudit = () => {
   useEffect(() => {
     // Log security events
     const logSecurityEvent = (event, details) => {
-      console.log(`[SECURITY] ${event}:`, details);
       // In production, send to server for logging
     };
 

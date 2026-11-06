@@ -7,11 +7,11 @@ import { AuthContext } from '../context/AuthContext';
  */
 const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
+
   return context;
 };
 
@@ -20,17 +20,17 @@ const useAuth = () => {
  */
 export const useRole = (requiredRole) => {
   const { user } = useAuth();
-  
+
   if (!user) return false;
-  
+
   if (requiredRole === 'admin') {
     return user.role === 'admin';
   }
-  
+
   if (requiredRole === 'member') {
     return user.role === 'member';
   }
-  
+
   return false;
 };
 
@@ -39,9 +39,9 @@ export const useRole = (requiredRole) => {
  */
 export const useRegistrationStatus = () => {
   const { user, hasPaidRegistration } = useAuth();
-  
+
   if (!user) return { hasPaid: false, isAdmin: false };
-  
+
   return {
     hasPaid: hasPaidRegistration || user.role === 'admin',
     isAdmin: user.role === 'admin',

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Shield, 
-  Lock, 
+import {
+  ArrowRight,
+  Shield,
+  Lock,
   CheckCircle,
   FileText,
   Clock,
@@ -72,7 +72,7 @@ const PrivacyPolicy = () => {
                 Finlight
               </span>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-6">
               <button onClick={() => navigate('/')} className="text-gray-300 hover:text-cyan-400 transition-colors flex items-center gap-1">
                 <Home className="h-4 w-4" />
@@ -87,7 +87,7 @@ const PrivacyPolicy = () => {
                 Print
               </button>
             </div>
-            
+
             <button
               onClick={() => navigate('/')}
               className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all flex items-center gap-2"
@@ -162,7 +162,7 @@ const PrivacyPolicy = () => {
                 >
                   {section.icon}
                   <span className="hidden sm:inline">{section.title}</span>
-                  <span className="sm:hidden">{section.title.split(' ').slice(0,2).join(' ')}</span>
+                  <span className="sm:hidden">{section.title.split(' ').slice(0, 2).join(' ')}</span>
                 </a>
               ))}
             </div>
@@ -173,13 +173,13 @@ const PrivacyPolicy = () => {
             {/* Introduction */}
             <div className="mb-8 pb-6 border-b border-gray-800">
               <p className="text-gray-400 leading-relaxed mb-4">
-                At Finlight ("we," "our," or "us"), we are committed to protecting your privacy and the security 
-                of your personal information. This Privacy Policy explains how we collect, use, disclose, and 
+                At Finlight ("we," "our," or "us"), we are committed to protecting your privacy and the security
+                of your personal information. This Privacy Policy explains how we collect, use, disclose, and
                 safeguard your information when you use our financial management platform.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                Please read this Privacy Policy carefully. By accessing or using our Service, you acknowledge 
-                that you have read, understood, and agree to be bound by all the terms of this Privacy Policy. 
+                Please read this Privacy Policy carefully. By accessing or using our Service, you acknowledge
+                that you have read, understood, and agree to be bound by all the terms of this Privacy Policy.
                 If you do not agree with these terms, please do not access or use our Service.
               </p>
             </div>
@@ -193,7 +193,7 @@ const PrivacyPolicy = () => {
               <p className="text-gray-400 leading-relaxed mb-3">
                 We collect several types of information from and about users of our platform:
               </p>
-              
+
               <div className="space-y-4 mt-4">
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <h3 className="font-semibold text-cyan-400 mb-2 flex items-center gap-2">
@@ -265,7 +265,7 @@ const PrivacyPolicy = () => {
                 3. Information Sharing & Disclosure
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                We do not sell, trade, or rent your personal information to third parties. However, we may share 
+                We do not sell, trade, or rent your personal information to third parties. However, we may share
                 your information in the following circumstances:
               </p>
               <ul className="space-y-2 text-gray-400 leading-relaxed pl-5 list-disc">
@@ -322,7 +322,7 @@ const PrivacyPolicy = () => {
                 </div>
               </div>
               <p className="text-gray-400 leading-relaxed mt-3 text-sm">
-                While we strive to protect your information, no method of transmission over the internet is 100% secure. 
+                While we strive to protect your information, no method of transmission over the internet is 100% secure.
                 We cannot guarantee absolute security, and you use our service at your own risk.
               </p>
             </div>
@@ -343,7 +343,7 @@ const PrivacyPolicy = () => {
                 <li>Monitor and prevent fraudulent activity</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                You can control cookie settings through your browser preferences. However, disabling cookies may 
+                You can control cookie settings through your browser preferences. However, disabling cookies may
                 affect the functionality of certain features on our platform.
               </p>
             </div>
@@ -367,7 +367,7 @@ const PrivacyPolicy = () => {
               </ul>
               <div className="mt-4 p-3 bg-gray-800/30 rounded-xl">
                 <p className="text-sm text-gray-400">
-                  To exercise any of these rights, please contact us at <span className="text-cyan-400">privacy@finlight.com</span>. 
+                  To exercise any of these rights, please contact us at <span className="text-cyan-400">Zephcoredigital@Zephcoredigital.ng</span>.
                   We will respond to your request within 30 days.
                 </p>
               </div>
@@ -380,7 +380,7 @@ const PrivacyPolicy = () => {
                 7. Data Retention
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                We retain your personal information for as long as your account is active or as needed to provide 
+                We retain your personal information for as long as your account is active or as needed to provide
                 you with our services. We may also retain and use your information as necessary to:
               </p>
               <ul className="space-y-2 text-gray-400 leading-relaxed pl-5 list-disc">
@@ -390,7 +390,7 @@ const PrivacyPolicy = () => {
                 <li>Maintain security and operational integrity</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                Upon account termination, your data will be deleted within 90 days, subject to any legal retention 
+                Upon account termination, your data will be deleted within 90 days, subject to any legal retention
                 obligations. You may request data export within 30 days of account closure.
               </p>
             </div>
@@ -402,8 +402,8 @@ const PrivacyPolicy = () => {
                 8. Children's Privacy
               </h2>
               <p className="text-gray-400 leading-relaxed">
-                Our Service is not intended for children under the age of 18. We do not knowingly collect personal 
-                information from children under 18. If you believe a child has provided us with personal information, 
+                Our Service is not intended for children under the age of 18. We do not knowingly collect personal
+                information from children under 18. If you believe a child has provided us with personal information,
                 please contact us immediately, and we will take steps to delete such information.
               </p>
             </div>
@@ -415,9 +415,9 @@ const PrivacyPolicy = () => {
                 9. International Data Transfers
               </h2>
               <p className="text-gray-400 leading-relaxed">
-                Your information may be transferred to and maintained on servers located outside of your country 
-                or jurisdiction. By using our Service, you consent to the transfer of your information to countries 
-                with different data protection laws. We take appropriate safeguards to ensure your data is protected 
+                Your information may be transferred to and maintained on servers located outside of your country
+                or jurisdiction. By using our Service, you consent to the transfer of your information to countries
+                with different data protection laws. We take appropriate safeguards to ensure your data is protected
                 in accordance with this Privacy Policy.
               </p>
             </div>
@@ -429,7 +429,7 @@ const PrivacyPolicy = () => {
                 10. Updates to This Privacy Policy
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                We may update this Privacy Policy from time to time to reflect changes in our practices or for 
+                We may update this Privacy Policy from time to time to reflect changes in our practices or for
                 operational, legal, or regulatory reasons. We will notify you of any material changes by:
               </p>
               <ul className="space-y-2 text-gray-400 leading-relaxed pl-5 list-disc">
@@ -438,7 +438,7 @@ const PrivacyPolicy = () => {
                 <li>Displaying a prominent notice on our platform</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                The "Last Updated" date at the top of this page indicates when changes were made. Your continued 
+                The "Last Updated" date at the top of this page indicates when changes were made. Your continued
                 use of the Service after any changes constitutes acceptance of the updated policy.
               </p>
             </div>
@@ -458,8 +458,7 @@ const PrivacyPolicy = () => {
                     <Mail className="h-4 w-4 text-cyan-400" />
                     <span className="font-medium">Email</span>
                   </p>
-                  <p className="text-sm text-gray-400">privacy@finlight.com</p>
-                  <p className="text-sm text-gray-400">support@finlight.com</p>
+                  <p className="text-sm text-gray-400">Zephcoredigital@Zephcoredigital.ng</p>
                 </div>
                 <div className="bg-gray-800/30 rounded-xl p-4">
                   <p className="flex items-center gap-2 text-gray-300 mb-2">
@@ -483,24 +482,24 @@ const PrivacyPolicy = () => {
             {/* Footer Note */}
             <div className="mt-8 pt-6 border-t border-gray-800 text-center">
               <p className="text-xs text-gray-500">
-                By using Finlight, you consent to the collection and use of your information as described in 
+                By using Finlight, you consent to the collection and use of your information as described in
                 this Privacy Policy.
               </p>
               <div className="flex flex-wrap justify-center gap-4 mt-4 text-xs text-gray-600">
                 <button onClick={() => navigate('/terms')} className="hover:text-cyan-400 transition-colors">
                   Terms & Conditions
                 </button>
-                <span>•</span>
+                <span>â€¢</span>
                 <button onClick={handlePrint} className="hover:text-cyan-400 transition-colors">
                   Print This Policy
                 </button>
-                <span>•</span>
-                <button onClick={() => window.location.href = 'mailto:privacy@finlight.com'} className="hover:text-cyan-400 transition-colors">
+                <span>â€¢</span>
+                <button onClick={() => window.location.href = 'mailto:Zephcoredigital@Zephcoredigital.ng'} className="hover:text-cyan-400 transition-colors">
                   Request Data Deletion
                 </button>
               </div>
               <p className="text-xs text-gray-600 mt-4">
-                © {new Date().getFullYear()} Finlight. All rights reserved.
+                Â© {new Date().getFullYear()} Finlight. All rights reserved.
               </p>
             </div>
           </div>

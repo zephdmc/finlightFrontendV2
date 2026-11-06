@@ -12,7 +12,7 @@ const useLocalStorage = (key, initialValue) => {
     if (typeof window === 'undefined') {
       return initialValue;
     }
-    
+
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
@@ -21,18 +21,18 @@ const useLocalStorage = (key, initialValue) => {
       return initialValue;
     }
   };
-  
+
   const [storedValue, setStoredValue] = useState(readValue);
-  
+
   // Return a wrapped version of useState's setter function that persists the new value to localStorage
   const setValue = (value) => {
     try {
       // Allow value to be a function so we have same API as useState
       const valueToStore = value instanceof Function ? value(storedValue) : value;
-      
+
       // Save state
       setStoredValue(valueToStore);
-      
+
       // Save to localStorage
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(key, JSON.stringify(valueToStore));
@@ -41,7 +41,7 @@ const useLocalStorage = (key, initialValue) => {
       console.warn(`Error setting localStorage key "${key}":`, error);
     }
   };
-  
+
   // Listen for storage events to sync across tabs
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -49,14 +49,14 @@ const useLocalStorage = (key, initialValue) => {
         setStoredValue(JSON.parse(event.newValue));
       }
     };
-    
+
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
   }, [key]);
-  
+
   return [storedValue, setValue];
 };
 
@@ -70,11 +70,11 @@ export const useUserPreferences = () => {
     language: 'en',
     dashboardLayout: 'grid'
   });
-  
+
   const updatePreferences = (updates) => {
     setPreferences(prev => ({ ...prev, ...updates }));
   };
-  
+
   return { preferences, updatePreferences };
 };
 
@@ -83,7 +83,7 @@ export const useUserPreferences = () => {
  */
 export const useRecentlyViewed = (maxItems = 5) => {
   const [recentItems, setRecentItems] = useLocalStorage('recentlyViewed', []);
-  
+
   const addItem = (item) => {
     setRecentItems(prev => {
       // Remove if already exists
@@ -92,11 +92,11 @@ export const useRecentlyViewed = (maxItems = 5) => {
       return [item, ...filtered].slice(0, maxItems);
     });
   };
-  
+
   const clearItems = () => {
     setRecentItems([]);
   };
-  
+
   return { recentItems, addItem, clearItems };
 };
 

@@ -22,3 +22,32 @@ build/
 
 # Testing
 coverage/
+
+@"
+
+# Firebase local cache
+.firebase/
+
+# Android local configuration and signing credentials
+android/.gradle/
+
+
+# Android signing credentials
+android/**/*.jks
+android/**/*.keystore
+android/**/keystore.properties
+android/**/local.properties
+
+# Android build outputs
+android/build/
+android/app/build/
+"@ | Add-Content .gitignore
+# Android signing credentials
+android/**/*.jks
+android/**/*.keystore
+android/**/keystore.properties
+android/**/local.properties
+
+# Downloaded Gradle distributions
+android/gradle/wrapper/gradle-*-all.zip
+android/gradle/wrapper/gradle-*-bin.zip

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Shield, 
-  Lock, 
+import {
+  ArrowRight,
+  Shield,
+  Lock,
   CheckCircle,
   FileText,
   Clock,
@@ -60,7 +60,7 @@ const TermsAndConditions = () => {
                 Finlight
               </span>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-6">
               <button onClick={() => navigate('/')} className="text-gray-300 hover:text-cyan-400 transition-colors flex items-center gap-1">
                 <Home className="h-4 w-4" />
@@ -71,7 +71,7 @@ const TermsAndConditions = () => {
                 Print
               </button>
             </div>
-            
+
             <button
               onClick={() => navigate('/')}
               className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all flex items-center gap-2"
@@ -129,12 +129,12 @@ const TermsAndConditions = () => {
             {/* Introduction */}
             <div className="mb-8 pb-6 border-b border-gray-800">
               <p className="text-gray-400 leading-relaxed mb-4">
-                Please read these Terms and Conditions ("Terms", "Terms and Conditions") carefully before using 
+                Please read these Terms and Conditions ("Terms", "Terms and Conditions") carefully before using
                 the Finlight platform (the "Service") operated by Finlight ("us", "we", or "our").
               </p>
               <p className="text-gray-400 leading-relaxed">
-                Your access to and use of the Service is conditioned on your acceptance of and compliance with 
-                these Terms. These Terms apply to all visitors, users, and others who access or use the Service. 
+                Your access to and use of the Service is conditioned on your acceptance of and compliance with
+                these Terms. These Terms apply to all visitors, users, and others who access or use the Service.
                 By accessing or using the Service, you agree to be bound by these Terms.
               </p>
             </div>
@@ -146,13 +146,13 @@ const TermsAndConditions = () => {
                 1. Agreement to Terms
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                By registering for, accessing, or using the Finlight platform, you acknowledge that you have read, 
-                understood, and agree to be bound by these Terms and Conditions. If you do not agree with any part 
+                By registering for, accessing, or using the Finlight platform, you acknowledge that you have read,
+                understood, and agree to be bound by these Terms and Conditions. If you do not agree with any part
                 of these terms, you must not use our Service.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                Finlight reserves the right to modify or replace these Terms at any time. If a revision is material, 
-                we will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a 
+                Finlight reserves the right to modify or replace these Terms at any time. If a revision is material,
+                we will provide at least 30 days' notice prior to any new terms taking effect. What constitutes a
                 material change will be determined at our sole discretion.
               </p>
             </div>
@@ -194,8 +194,8 @@ const TermsAndConditions = () => {
                 <li>Integration with third-party payment processors</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                We reserve the right to modify, suspend, or discontinue any part of the Service at any time, 
-                with or without notice. We shall not be liable to you or any third party for any modification, 
+                We reserve the right to modify, suspend, or discontinue any part of the Service at any time,
+                with or without notice. We shall not be liable to you or any third party for any modification,
                 suspension, or discontinuation of the Service.
               </p>
             </div>
@@ -216,8 +216,8 @@ const TermsAndConditions = () => {
                 <li>Pay any applicable taxes associated with your subscription</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                <strong className="text-cyan-400">Refund Policy:</strong> All fees are non-refundable except as expressly 
-                provided in these Terms or as required by applicable law. You may cancel your subscription at any time, 
+                <strong className="text-cyan-400">Refund Policy:</strong> All fees are non-refundable except as expressly
+                provided in these Terms or as required by applicable law. You may cancel your subscription at any time,
                 and cancellation will take effect at the end of your current billing period.
               </p>
               <div className="mt-3 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
@@ -255,13 +255,13 @@ const TermsAndConditions = () => {
                 6. Privacy & Data Protection
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                Your privacy is important to us. Our Privacy Policy, which is incorporated into these Terms, 
-                explains how we collect, use, and protect your personal information. By using Finlight, you 
+                Your privacy is important to us. Our Privacy Policy, which is incorporated into these Terms,
+                explains how we collect, use, and protect your personal information. By using Finlight, you
                 consent to the collection and use of your information as described in our Privacy Policy.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                We employ industry-standard security measures to protect your data, including encryption, 
-                firewalls, and secure data centers. However, no method of transmission over the internet is 
+                We employ industry-standard security measures to protect your data, including encryption,
+                firewalls, and secure data centers. However, no method of transmission over the internet is
                 100% secure, and we cannot guarantee absolute security.
               </p>
             </div>
@@ -273,13 +273,13 @@ const TermsAndConditions = () => {
                 7. Termination
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                We may terminate or suspend your account immediately, without prior notice or liability, 
+                We may terminate or suspend your account immediately, without prior notice or liability,
                 for any reason whatsoever, including without limitation if you breach these Terms.
               </p>
               <p className="text-gray-400 leading-relaxed">
-                Upon termination, your right to use the Service will cease immediately. You may export your 
-                data for 30 days following termination, after which your data may be permanently deleted. 
-                All provisions of these Terms which by their nature should survive termination shall survive, 
+                Upon termination, your right to use the Service will cease immediately. You may export your
+                data for 30 days following termination, after which your data may be permanently deleted.
+                All provisions of these Terms which by their nature should survive termination shall survive,
                 including ownership provisions, warranty disclaimers, indemnity, and limitations of liability.
               </p>
             </div>
@@ -291,8 +291,8 @@ const TermsAndConditions = () => {
                 8. Limitations of Liability
               </h2>
               <p className="text-gray-400 leading-relaxed mb-3">
-                To the maximum extent permitted by applicable law, in no event shall Finlight, its directors, 
-                employees, partners, or suppliers be liable for any indirect, incidental, special, consequential, 
+                To the maximum extent permitted by applicable law, in no event shall Finlight, its directors,
+                employees, partners, or suppliers be liable for any indirect, incidental, special, consequential,
                 or punitive damages, including without limitation:
               </p>
               <ul className="space-y-2 text-gray-400 leading-relaxed pl-5 list-disc">
@@ -302,8 +302,8 @@ const TermsAndConditions = () => {
                 <li>Any other loss or damage of any kind</li>
               </ul>
               <p className="text-gray-400 leading-relaxed mt-3">
-                Our total liability to you for all claims arising out of or relating to these Terms or the 
-                Service shall not exceed the amount you have paid to us in the twelve months preceding the 
+                Our total liability to you for all claims arising out of or relating to these Terms or the
+                Service shall not exceed the amount you have paid to us in the twelve months preceding the
                 event giving rise to the liability.
               </p>
             </div>
@@ -315,8 +315,8 @@ const TermsAndConditions = () => {
                 9. Third-Party Services
               </h2>
               <p className="text-gray-400 leading-relaxed">
-                Finlight integrates with third-party payment processors and services. We are not responsible 
-                for the terms, practices, or performance of these third-party services. Your use of third-party 
+                Finlight integrates with third-party payment processors and services. We are not responsible
+                for the terms, practices, or performance of these third-party services. Your use of third-party
                 services is at your own risk and subject to their respective terms and conditions.
               </p>
             </div>
@@ -327,8 +327,8 @@ const TermsAndConditions = () => {
                 10. Governing Law
               </h2>
               <p className="text-gray-400 leading-relaxed">
-                These Terms shall be governed and construed in accordance with the laws of the Federal Republic 
-                of Nigeria, without regard to its conflict of law provisions. Any disputes arising under these 
+                These Terms shall be governed and construed in accordance with the laws of the Federal Republic
+                of Nigeria, without regard to its conflict of law provisions. Any disputes arising under these
                 Terms shall be subject to the exclusive jurisdiction of the courts located in Lagos, Nigeria.
               </p>
             </div>
@@ -344,7 +344,7 @@ const TermsAndConditions = () => {
               <div className="space-y-2 text-gray-400">
                 <p className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-cyan-400" />
-                  <span>Email: legal@finlight.com</span>
+                  <span>Email: Zephcoredigital@Zephcoredigital.ng</span>
                 </p>
                 <p className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-cyan-400" />
@@ -360,11 +360,11 @@ const TermsAndConditions = () => {
             {/* Footer Note */}
             <div className="mt-8 pt-6 border-t border-gray-800 text-center">
               <p className="text-xs text-gray-500">
-                By continuing to use Finlight, you acknowledge that you have read, understood, and agree to 
+                By continuing to use Finlight, you acknowledge that you have read, understood, and agree to
                 be bound by these Terms and Conditions.
               </p>
               <p className="text-xs text-gray-600 mt-2">
-                © {new Date().getFullYear()} Finlight. All rights reserved.
+                Â© {new Date().getFullYear()} Finlight. All rights reserved.
               </p>
             </div>
           </div>

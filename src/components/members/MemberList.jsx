@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import { Search, Filter, ChevronLeft, ChevronRight, Eye, Edit, Trash2, Mail, Phone, Calendar, ChevronDown, UserPlus, Users as UsersIcon, X, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, Eye, Edit, Trash2, Mail, Calendar, ChevronDown, UserPlus, Users as UsersIcon, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../common/LoadingSpinner';
 import ErrorAlert from '../common/ErrorAlert';
@@ -49,14 +49,49 @@ const MemberList = () => {
         role: filterRole !== 'all' ? filterRole : undefined,
         status: filterStatus !== 'all' ? filterStatus : undefined
       };
-      
-      const { data } = await api.get('/users', { params });
-      setMembers(data.data.records);
-      setTotalPages(data.data.pagination.pages);
-      setTotalMembers(data.data.pagination.total);
+
+      const response = await api.get('/users', { params });
+
+      // SAFE RESPONSE HANDLING - Check structure before accessing
+      let records = [];
+      let pagination = { pages: 1, total: 0 };
+
+      // Handle different possible response structures
+      if (response?.data?.data?.records) {
+        records = response.data.data.records;
+        pagination = response.data.data.pagination || { pages: 1, total: records.length };
+      } else if (response?.data?.records) {
+        records = response.data.records;
+        pagination = { pages: 1, total: records.length };
+      } else if (Array.isArray(response?.data)) {
+        records = response.data;
+        pagination = { pages: 1, total: records.length };
+      } else if (response?.data?.data && Array.isArray(response.data.data)) {
+        records = response.data.data;
+        pagination = { pages: 1, total: records.length };
+      }
+
+      // Ensure records is an array
+      if (!Array.isArray(records)) {
+        records = [];
+      }
+
+      setMembers(records);
+      setTotalPages(pagination.pages || 1);
+      setTotalMembers(pagination.total || records.length);
+
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to fetch members');
-      toast.error('Failed to load members');
+      console.error('Failed to fetch members:', error);
+
+      // Don't show error for empty database - just show empty state
+      if (error.response?.status === 404) {
+        setMembers([]);
+        setTotalMembers(0);
+        setTotalPages(1);
+      } else {
+        setError(error.response?.data?.message || 'Failed to fetch members');
+        toast.error('Failed to load members');
+      }
     } finally {
       setLoading(false);
     }
@@ -84,7 +119,7 @@ const MemberList = () => {
 
   const handleDeleteConfirm = async () => {
     if (!selectedMember) return;
-    
+
     try {
       await api.delete(`/users/${selectedMember._id}`);
       toast.success('Member deleted successfully');
@@ -96,21 +131,26 @@ const MemberList = () => {
   };
 
   const getStatusBadge = (member) => {
-    if (member.role === 'admin') {
-      return { text: 'Admin', class: 'bg-purple-100 text-purple-700', icon: Shield };
+    if (member?.role === 'admin') {
+      return { text: 'Admin', class: 'bg-purple-100 text-purple-700', icon: ShieldIcon };
     }
-    if (member.registrationStatus === 'paid') {
-      return { text: 'Active', class: 'bg-green-100 text-green-700', icon: CheckCircle };
+    if (member?.registrationStatus === 'paid' || member?.hasPaidRegistration) {
+      return { text: 'Active', class: 'bg-blue-100 text-blue-700', icon: CheckCircle };
     }
     return { text: 'Pending', class: 'bg-yellow-100 text-yellow-700', icon: Clock };
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
+    if (!date) return 'N/A';
+    try {
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    } catch {
+      return 'Invalid date';
+    }
   };
 
   const clearFilters = () => {
@@ -141,9 +181,8 @@ const MemberList = () => {
               <p className="text-sm text-gray-500 mt-0.5">{totalMembers} total members</p>
             </div>
             <Link
-              to="/register"
-              state={{ fromMembers: true }}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 text-center font-medium shadow-md flex items-center gap-2"
+              to="/members/add"
+              className="bg-gradient-to-r from-blue-600 to-blue-600 text-white px-4 py-2 rounded-xl hover:from-blue-700 hover:to-blue-700 transition-all duration-200 text-center font-medium shadow-md flex items-center gap-2"
             >
               <UserPlus className="h-4 w-4" />
               {!isMobile && "Add Member"}
@@ -168,11 +207,10 @@ const MemberList = () => {
               </div>
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`p-2.5 rounded-xl border transition-colors ${
-                  showFilters || hasActiveFilters
-                    ? 'bg-blue-50 border-blue-300 text-blue-600'
-                    : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                }`}
+                className={`p-2.5 rounded-xl border transition-colors ${showFilters || hasActiveFilters
+                  ? 'bg-blue-50 border-blue-300 text-blue-600'
+                  : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
               >
                 <Filter className="h-5 w-5" />
               </button>
@@ -276,8 +314,7 @@ const MemberList = () => {
                 </button>
               ) : (
                 <Link
-                  to="/register"
-                  state={{ fromMembers: true }}
+                  to="/members/add"
                   className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm"
                 >
                   <UserPlus className="h-4 w-4" />
@@ -291,7 +328,7 @@ const MemberList = () => {
               const StatusIcon = status.icon;
               return (
                 <div
-                  key={member._id}
+                  key={member?._id || Math.random()}
                   className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all active:bg-gray-50"
                 >
                   <div className="p-4">
@@ -300,7 +337,7 @@ const MemberList = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <h3 className="font-semibold text-gray-900 text-base">
-                            {member.name}
+                            {member?.name || 'Unknown Member'}
                           </h3>
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full ${status.class}`}>
                             <StatusIcon className="h-3 w-3" />
@@ -309,38 +346,38 @@ const MemberList = () => {
                         </div>
                         <p className="text-sm text-gray-500 flex items-center gap-1 mb-1">
                           <Mail className="h-3.5 w-3.5" />
-                          {member.email}
+                          {member?.email || 'No email'}
                         </p>
                         <p className="text-xs text-gray-400 flex items-center gap-1">
                           <Calendar className="h-3.5 w-3.5" />
-                          Registered {formatDate(member.createdAt)}
+                          Registered {formatDate(member?.createdAt)}
                         </p>
                       </div>
-                      
+
                       {/* Action Icons */}
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 bg-blue-50 p-1 rounded-xl">
                         <Link
-                          to={`/members/${member._id}`}
+                          to={`/members/${member?._id}`}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                           title="View Details"
-                          aria-label={`View ${member.name}`}
+                          aria-label={`View ${member?.name}`}
                         >
                           <Eye className="h-5 w-5" />
                         </Link>
                         <Link
-                          to={`/members/edit/${member._id}`}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-xl transition-colors"
+                          to={`/members/edit/${member?._id}`}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
                           title="Edit"
-                          aria-label={`Edit ${member.name}`}
+                          aria-label={`Edit ${member?.name}`}
                         >
                           <Edit className="h-5 w-5" />
                         </Link>
-                        {member.role !== 'admin' && (
+                        {member?.role !== 'admin' && (
                           <button
                             onClick={() => handleDeleteClick(member)}
                             className="p-2 text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                             title="Delete"
-                            aria-label={`Delete ${member.name}`}
+                            aria-label={`Delete ${member?.name}`}
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
@@ -352,10 +389,10 @@ const MemberList = () => {
                     <div className="border-t border-gray-100 pt-3 mt-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-gray-500">
-                          {member.role === 'admin' ? 'Administrator' : 'Regular Member'}
+                          {member?.role === 'admin' ? 'Administrator' : 'Regular Member'}
                         </span>
                         <span className="text-gray-400 font-mono">
-                          ID: {member._id.slice(-6)}
+                          ID: {member?._id?.slice(-6) || 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -404,7 +441,7 @@ const MemberList = () => {
               </div>
               <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">Delete Member</h3>
               <p className="text-sm text-gray-600 text-center mb-6">
-                Are you sure you want to delete <span className="font-semibold">{selectedMember.name}</span>? 
+                Are you sure you want to delete <span className="font-semibold">{selectedMember?.name}</span>?
                 This action cannot be undone.
               </p>
               <div className="flex gap-3">
@@ -426,7 +463,7 @@ const MemberList = () => {
         </div>
       )}
 
-      <style jsx>{`
+      <style>{`
         @keyframes slide-up {
           from {
             transform: translateY(100%);
@@ -443,8 +480,8 @@ const MemberList = () => {
   );
 };
 
-// Add missing Shield icon import
-const Shield = ({ className }) => (
+// Shield Icon Component
+const ShieldIcon = ({ className }) => (
   <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2L3 7v7c0 5.5 9 9 9 9s9-3.5 9-9V7l-9-5z" />
   </svg>

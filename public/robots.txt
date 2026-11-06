@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /admin/
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /payments
+Disallow: /members/
+Disallow: /reports
+Disallow: /account
+Disallow: /organization-settings
+Disallow: /bank-change-request
+Disallow: /admin-history
+Disallow: /fine-management
+Disallow: /contribution-management
+Disallow: /payment-history
+Disallow: /make-payment
+Disallow: /payment/callback
+Disallow: /payment-verify
+
+Sitemap: https://finlightv2.web.app/sitemap.xml

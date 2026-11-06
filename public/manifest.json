@@ -1,11 +1,10 @@
 {
-    "name": "AGFMA - Age Grade Financial Management",
-    "short_name": "AGFMA",
-    "description": "Financial management platform for community organizations",
-    "start_url": "/",
-    "display": "standalone",
-    "theme_color": "#3B82F6",
-    "background_color": "#ffffff",
-    "icons": []
-  }
-  
+  "name": "Finlight Financial Management",
+  "short_name": "Finlight",
+  "description": "Financial management platform for community organizations",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#3B82F6",
+  "background_color": "#ffffff",
+  "icons": []
+}

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/common/Navbar';
-import { 
-  User, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Save, 
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Save,
   X,
   Shield,
   CheckCircle,
@@ -27,7 +27,7 @@ const ProfileSettings = () => {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -35,7 +35,7 @@ const ProfileSettings = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  
+
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState(false);
 
@@ -66,14 +66,14 @@ const ProfileSettings = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Password validation (only if trying to change password)
     if (formData.newPassword || formData.currentPassword || formData.confirmPassword) {
       if (!formData.currentPassword) {
@@ -93,7 +93,7 @@ const ProfileSettings = () => {
         newErrors.newPassword = 'New password must be different from current password';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -103,17 +103,17 @@ const ProfileSettings = () => {
       setErrors({ email: 'Email is required' });
       return false;
     }
-    
+
     if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(formData.email)) {
       setErrors({ email: 'Please enter a valid email address' });
       return false;
     }
-    
+
     try {
       const userId = user?._id || user?.id;
       await api.put(`/users/${userId}`, { email: formData.email });
       toast.success('Email updated successfully');
-      
+
       // Update local user data
       if (user) {
         user.email = formData.email;
@@ -130,11 +130,11 @@ const ProfileSettings = () => {
     if (!formData.currentPassword || !formData.newPassword) {
       return false;
     }
-    
+
     try {
       await AuthService.changePassword(formData.currentPassword, formData.newPassword);
       toast.success('Password changed successfully');
-      
+
       // Clear password fields
       setFormData(prev => ({
         ...prev,
@@ -142,7 +142,7 @@ const ProfileSettings = () => {
         newPassword: '',
         confirmPassword: ''
       }));
-      
+
       return true;
     } catch (error) {
       console.error('Error changing password:', error);
@@ -153,31 +153,31 @@ const ProfileSettings = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     // Update email if changed
     let emailUpdated = true;
     if (formData.email !== user?.email) {
       emailUpdated = await handleUpdateEmail();
     }
-    
+
     // Change password if provided
     let passwordChanged = true;
     if (formData.newPassword) {
       passwordChanged = await handleChangePassword();
     }
-    
+
     setLoading(false);
-    
+
     if (emailUpdated && passwordChanged) {
       setSuccess(true);
       toast.success('Profile updated successfully');
-      
+
       // If password was changed, logout and redirect to login after 2 seconds
       if (formData.newPassword) {
         toast.success('Password changed. Please login again.');
@@ -205,7 +205,7 @@ const ProfileSettings = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <Navbar />
-      
+
       <div className="max-w-2xl mx-auto px-4 py-4 space-y-4">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
@@ -265,7 +265,7 @@ const ProfileSettings = () => {
                 </div>
                 <p className="text-xs text-gray-400 mt-1">Name cannot be changed. Contact admin for name changes.</p>
               </div>
-              
+
               {/* Email - Editable */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -402,7 +402,7 @@ const ProfileSettings = () => {
               <div>
                 <p className="text-sm font-medium text-blue-800">Security Note</p>
                 <p className="text-xs text-blue-700 mt-1">
-                  Your password is encrypted and never stored in plain text. 
+                  Your password is encrypted and never stored in plain text.
                   If you change your password, you will need to log in again.
                 </p>
               </div>

@@ -4,7 +4,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import LoadingSpinner from '../common/LoadingSpinner';
-import { User, Mail, Lock, Shield, X, AlertCircle, Eye, EyeOff, Users, Info } from 'lucide-react';
+import { User, Mail, Lock, Shield, X, AlertCircle, Eye, EyeOff, Users, Info, Phone } from 'lucide-react';
 
 /**
  * Member Form Component
@@ -27,10 +27,16 @@ const MemberForm = ({ isEdit = false }) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    phoneNumber: '',
     password: '',
     role: 'member'
   });
   const [errors, setErrors] = useState({});
+
+  // Helper function to get user ID (works with both _id and id)
+  const getUserId = (user) => {
+    return user?._id || user?.id;
+  };
 
   useEffect(() => {
     // Check permissions for edit mode
@@ -38,7 +44,10 @@ const MemberForm = ({ isEdit = false }) => {
       // Allow access if:
       // 1. User is admin, OR
       // 2. User is editing their own profile
-      if (!isAdmin && currentUser?._id !== id) {
+      const currentUserId = getUserId(currentUser);
+      const isOwnProfile = currentUserId === id;
+
+      if (!isAdmin && !isOwnProfile) {
         setAccessDenied(true);
         setFetching(false);
         toast.error("You don't have permission to edit this member's profile");
@@ -55,19 +64,19 @@ const MemberForm = ({ isEdit = false }) => {
     setCheckingLimit(true);
     try {
       const response = await api.get('/auth/check-member-limit');
-      const data = response.data.data;
+      // Safely extract data
+      const data = response.data?.data || response.data;
       setMemberLimit(data);
-      
-      if (data.isFull) {
+
+      if (data?.isFull) {
         toast.error(`Member registration limit reached. Maximum of ${data.maxMembers} members allowed.`, {
           duration: 5000,
-          icon: '⚠️'
+          icon: 'âš ï¸'
         });
-      } else if (data.percentageFull >= 80) {
+      } else if (data?.percentageFull >= 80) {
         toast.custom((t) => (
-          <div className={`bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-lg max-w-md ${
-            t.visible ? 'animate-enter' : 'animate-leave'
-          }`}>
+          <div className={`bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-lg max-w-md ${t.visible ? 'animate-enter' : 'animate-leave'
+            }`}>
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
               <div className="flex-1">
@@ -88,16 +97,44 @@ const MemberForm = ({ isEdit = false }) => {
   };
 
   const fetchMember = async () => {
+    setFetching(true);
     try {
-      const { data } = await api.get(`/users/${id}`);
+      const response = await api.get(`/users/${id}`);
+
+
+      // SAFE DATA EXTRACTION - Handle different response structures
+      let userData = null;
+
+      // Check various possible response structures
+      if (response.data?.data?.user) {
+        userData = response.data.data.user;
+      } else if (response.data?.data?.data) {
+        userData = response.data.data.data;
+      } else if (response.data?.data) {
+        userData = response.data.data;
+      } else if (response.data?.user) {
+        userData = response.data.user;
+      } else {
+        userData = response.data;
+      }
+
+      // Ensure we have valid data
+      if (!userData || (!userData.name && !userData.email)) {
+        throw new Error('Invalid member data received');
+      }
+
       setFormData({
-        name: data.data.user.name,
-        email: data.data.user.email,
-        role: data.data.user.role,
+        name: userData.name || '',
+        email: userData.email || '',
+        phoneNumber: userData.phoneNumber || '',
+        role: userData.role || 'member',
         password: '' // Don't populate password
       });
+
     } catch (error) {
-      toast.error('Failed to fetch member details');
+      console.error('Failed to fetch member details:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error(error.response?.data?.message || 'Failed to fetch member details');
       navigate('/members');
     } finally {
       setFetching(false);
@@ -113,21 +150,48 @@ const MemberForm = ({ isEdit = false }) => {
     }
   };
 
+  // Phone number validation
+  const validatePhoneNumber = (phone) => {
+    // Nigerian phone numbers: 11 digits, starts with 0 or +234
+    const nigerianPhoneRegex = /^(\+234|0)[7-9][0-9]{9}$/;
+    if (!phone) return true; // Optional field
+    return nigerianPhoneRegex.test(phone);
+  };
+
+  // Format phone number to international format
+  const formatPhoneNumber = (phone) => {
+    if (!phone) return '';
+    // Convert 0XXXXXXXXXX to +234XXXXXXXXXX
+    if (phone.startsWith('0')) {
+      return '+234' + phone.slice(1);
+    }
+    // If already has +234, return as is
+    if (phone.startsWith('+234')) {
+      return phone;
+    }
+    return phone;
+  };
+
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (formData.name.length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
+    // Phone number validation
+    if (formData.phoneNumber && !validatePhoneNumber(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Please enter a valid Nigerian phone number (e.g., 08012345678 or +2348012345678)';
+    }
+
     if (!isEdit && !formData.password) {
       newErrors.password = 'Password is required';
     } else if (!isEdit && formData.password.length < 6) {
@@ -135,36 +199,36 @@ const MemberForm = ({ isEdit = false }) => {
     } else if (!isEdit && !/(?=.*[A-Za-z])(?=.*\d)/.test(formData.password)) {
       newErrors.password = 'Password must contain at least one letter and one number';
     }
-    
+
     // For edit mode, if password is provided, validate it
     if (isEdit && formData.password && formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     } else if (isEdit && formData.password && !/(?=.*[A-Za-z])(?=.*\d)/.test(formData.password)) {
       newErrors.password = 'Password must contain at least one letter and one number';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     // Check member limit before submitting for new member registration
     if (!isEdit && isAdmin) {
       // Refresh limit check before submission
       try {
         const response = await api.get('/auth/check-member-limit');
-        const data = response.data.data;
-        
-        if (data.isFull) {
+        const data = response.data?.data || response.data;
+
+        if (data?.isFull) {
           toast.error(`Member registration limit reached. Maximum of ${data.maxMembers} members allowed.`, {
             duration: 5000,
-            icon: '⚠️'
+            icon: 'âš ï¸'
           });
           // Navigate back to members page after showing error
           setTimeout(() => {
@@ -179,34 +243,33 @@ const MemberForm = ({ isEdit = false }) => {
         return;
       }
     }
-    
+
     setLoading(true);
-    
+
     try {
       if (isEdit) {
         // Update existing member
         const updateData = {
           name: formData.name,
           email: formData.email,
+          phoneNumber: formatPhoneNumber(formData.phoneNumber),
         };
-        
+
         // Only admins can change roles
         if (isAdmin) {
           updateData.role = formData.role;
         }
-        
+
         // Only include password if it was provided (not empty)
         if (formData.password && formData.password.trim() !== '') {
           updateData.password = formData.password;
         }
-        
-        console.log('Updating user with data:', updateData);
-        
+
+
         const response = await api.put(`/users/${id}`, updateData);
-        console.log('Update response:', response.data);
-        
+
         toast.success('Profile updated successfully');
-        
+
         // Redirect based on who is editing
         if (isAdmin) {
           navigate('/members');
@@ -215,20 +278,38 @@ const MemberForm = ({ isEdit = false }) => {
         }
       } else {
         // Create new member (admin only)
-        await api.post('/users/register', formData);
-        toast.success('Member registered successfully');
+        const submitData = {
+          name: formData.name,
+          email: formData.email,
+          phoneNumber: formatPhoneNumber(formData.phoneNumber),
+          password: formData.password,
+          role: formData.role
+        };
+
+        await api.post('/users/register', submitData);
+
+        // Show SMS notification if phone number was provided
+        if (formData.phoneNumber) {
+          toast.success(
+            `Member registered successfully! Login credentials sent to ${formData.email} via mail.`,
+            { duration: 5000, icon: 'ï¿½' }
+          );
+        } else {
+          toast.success('Member registered successfully');
+        }
+
         navigate('/members');
       }
     } catch (error) {
       console.error('Registration/Update error:', error);
       const message = error.response?.data?.message || 'Operation failed';
-      
+
       // Check if error is about member limit
-      if (message.toLowerCase().includes('limit reached') || 
-          message.toLowerCase().includes('maximum')) {
+      if (message.toLowerCase().includes('limit reached') ||
+        message.toLowerCase().includes('maximum')) {
         toast.error(message, {
           duration: 5000,
-          icon: '⚠️'
+          icon: 'âš ï¸'
         });
         // Navigate back to members page after 3 seconds
         setTimeout(() => {
@@ -237,7 +318,7 @@ const MemberForm = ({ isEdit = false }) => {
       } else {
         toast.error(message);
       }
-      
+
       if (error.response?.data?.errors) {
         const fieldErrors = {};
         error.response.data.errors.forEach(err => {
@@ -279,7 +360,8 @@ const MemberForm = ({ isEdit = false }) => {
   }
 
   // Check if current user is editing their own profile
-  const isOwnProfile = currentUser?._id === id;
+  const currentUserId = getUserId(currentUser);
+  const isOwnProfile = currentUserId === id;
 
   return (
     <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm p-6">
@@ -294,7 +376,7 @@ const MemberForm = ({ isEdit = false }) => {
           <X className="h-6 w-6" />
         </button>
       </div>
-      
+
       {/* Member Limit Warning Banner for Add Member Form */}
       {!isEdit && memberLimit && memberLimit.isFull && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -331,7 +413,7 @@ const MemberForm = ({ isEdit = false }) => {
           </div>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name Field */}
         <div>
@@ -345,9 +427,8 @@ const MemberForm = ({ isEdit = false }) => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.name ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Enter full name"
               disabled={!isEdit && memberLimit?.isFull}
             />
@@ -356,7 +437,7 @@ const MemberForm = ({ isEdit = false }) => {
             <p className="mt-1 text-sm text-red-600">{errors.name}</p>
           )}
         </div>
-        
+
         {/* Email Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -369,9 +450,8 @@ const MemberForm = ({ isEdit = false }) => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.email ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder="Enter email address"
               disabled={!isEdit && memberLimit?.isFull}
             />
@@ -380,7 +460,33 @@ const MemberForm = ({ isEdit = false }) => {
             <p className="mt-1 text-sm text-red-600">{errors.email}</p>
           )}
         </div>
-        
+
+        {/* Phone Number Field - NEW */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Phone Number <span className="text-gray-400 text-xs font-normal">(Optional - for SMS notifications)</span>
+          </label>
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              type="tel"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.phoneNumber ? 'border-red-500' : 'border-gray-300'
+                }`}
+              placeholder="08012345678 or +2348012345678"
+              disabled={!isEdit && memberLimit?.isFull}
+            />
+          </div>
+          {errors.phoneNumber && (
+            <p className="mt-1 text-sm text-red-600">{errors.phoneNumber}</p>
+          )}
+          <p className="mt-1 text-xs text-gray-500">
+            Nigerian phone numbers only. Member will receive login credentials via SMS when created.
+          </p>
+        </div>
+
         {/* Password Field */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -393,9 +499,8 @@ const MemberForm = ({ isEdit = false }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errors.password ? 'border-red-500' : 'border-gray-300'
-              }`}
+              className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
+                }`}
               placeholder={isEdit ? 'Enter new password' : 'Enter password'}
               disabled={!isEdit && memberLimit?.isFull}
             />
@@ -422,7 +527,7 @@ const MemberForm = ({ isEdit = false }) => {
             </p>
           )}
         </div>
-        
+
         {/* Role Field - Only show for admins */}
         {isAdmin && (
           <div>
@@ -447,7 +552,7 @@ const MemberForm = ({ isEdit = false }) => {
             </p>
           </div>
         )}
-        
+
         {/* Capacity Info for Admin */}
         {!isEdit && isAdmin && memberLimit && !memberLimit.isFull && (
           <div className="bg-blue-50 rounded-lg p-3">
@@ -464,17 +569,17 @@ const MemberForm = ({ isEdit = false }) => {
             </div>
           </div>
         )}
-        
+
         {/* Info message for non-admin editing their profile */}
         {!isAdmin && isOwnProfile && (
           <div className="bg-blue-50 rounded-lg p-3">
             <p className="text-sm text-blue-800">
-              <strong>Note:</strong> You can update your name, email, and password. 
+              <strong>Note:</strong> You can update your name, email, phone number, and password.
               Role changes can only be made by an administrator.
             </p>
           </div>
         )}
-        
+
         {/* Form Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <button
@@ -487,11 +592,10 @@ const MemberForm = ({ isEdit = false }) => {
           <button
             type="submit"
             disabled={loading || (!isEdit && memberLimit?.isFull)}
-            className={`px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2 ${
-              !isEdit && memberLimit?.isFull
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            } disabled:opacity-50`}
+            className={`px-4 py-2 rounded-lg transition duration-200 flex items-center gap-2 ${!isEdit && memberLimit?.isFull
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+              } disabled:opacity-50`}
           >
             {loading ? (
               <>

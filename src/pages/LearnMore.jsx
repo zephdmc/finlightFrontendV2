@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Shield, 
-  CreditCard, 
-  Users, 
-  BarChart3, 
-  Bell, 
-  Smartphone, 
+import {
+  ArrowRight,
+  Shield,
+  CreditCard,
+  Users,
+  BarChart3,
+  Bell,
+  Smartphone,
   Lock,
   CheckCircle,
   ChevronRight,
@@ -284,13 +284,13 @@ const LearnMore = () => {
                 AGFMA
               </span>
             </div>
-            
+
             <div className="hidden md:flex items-center gap-8">
               <button onClick={() => navigate('/')} className="text-gray-600 hover:text-blue-600 transition-colors">Home</button>
               <button onClick={() => navigate('/learn-more')} className="text-blue-600 font-medium">Learn More</button>
               <button onClick={() => navigate('/login')} className="text-gray-600 hover:text-blue-600 transition-colors">Login</button>
             </div>
-            
+
             <button
               onClick={handleGetStarted}
               className="px-5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-2"
@@ -340,11 +340,10 @@ const LearnMore = () => {
                   setActiveTab(section.id);
                   document.getElementById(section.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${
-                  activeTab === section.id
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg whitespace-nowrap transition-all ${activeTab === section.id
                     ? 'bg-blue-50 text-blue-600 font-medium'
                     : 'text-gray-600 hover:bg-gray-50'
-                }`}
+                  }`}
               >
                 {section.icon}
                 <span>{section.title}</span>
@@ -376,13 +375,13 @@ const LearnMore = () => {
                 Simplifying Financial Management for Communities
               </h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                AGFMA was born from the need to provide age grades, cooperatives, and community organizations 
-                with a modern, transparent, and efficient way to manage their finances. We understand the 
+                AGFMA was born from the need to provide age grades, cooperatives, and community organizations
+                with a modern, transparent, and efficient way to manage their finances. We understand the
                 challenges of manual record-keeping, delayed payments, and lack of financial transparency.
               </p>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                Our platform automates the entire financial management process, from member registration 
-                and payment collection to comprehensive reporting and analytics. We're committed to helping 
+                Our platform automates the entire financial management process, from member registration
+                and payment collection to comprehensive reporting and analytics. We're committed to helping
                 communities thrive with better financial management.
               </p>
               <div className="flex items-center gap-4">
@@ -392,7 +391,7 @@ const LearnMore = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-sm text-gray-700">₦10M+ Processed</span>
+                  <span className="text-sm text-gray-700">â‚¦10M+ Processed</span>
                 </div>
               </div>
             </div>
@@ -537,11 +536,10 @@ const LearnMore = () => {
             {pricingPlans.map((plan, index) => (
               <div
                 key={index}
-                className={`relative rounded-2xl p-8 transition-all ${
-                  plan.recommended
+                className={`relative rounded-2xl p-8 transition-all ${plan.recommended
                     ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl scale-105'
                     : 'bg-white border border-gray-200 hover:shadow-lg'
-                }`}
+                  }`}
               >
                 {plan.recommended && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-gray-900 px-4 py-1 rounded-full text-sm font-semibold">
@@ -553,7 +551,7 @@ const LearnMore = () => {
                 </h3>
                 <div className="mb-4">
                   <span className={`text-4xl font-bold ${plan.recommended ? 'text-white' : 'text-gray-900'}`}>
-                    {plan.price === 'Custom' ? plan.price : `₦${plan.price}`}
+                    {plan.price === 'Custom' ? plan.price : `â‚¦${plan.price}`}
                   </span>
                   {plan.price !== 'Custom' && (
                     <span className={`text-sm ${plan.recommended ? 'text-blue-200' : 'text-gray-500'}`}>
@@ -655,7 +653,7 @@ const LearnMore = () => {
                 Modern financial management for age grades and community organizations.
               </p>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Quick Links</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
@@ -664,13 +662,13 @@ const LearnMore = () => {
                 <li><button onClick={handleGetStarted} className="hover:text-white transition-colors">Get Started</button></li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Contact</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  <span>support@agfma.com</span>
+                  <span>Zephcoredigital@Zephcoredigital.ng</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
@@ -678,7 +676,7 @@ const LearnMore = () => {
                 </li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
@@ -697,7 +695,7 @@ const LearnMore = () => {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
             <p>&copy; 2024 AGFMA. All rights reserved.</p>
           </div>

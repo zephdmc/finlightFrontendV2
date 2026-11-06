@@ -7,6 +7,7 @@ import { SecurityProvider } from './context/SecurityContext';
 import { ErrorBoundary } from './components/common/ErrorAlert';
 import SecurityErrorBoundary from './components/common/SecurityErrorBoundary';
 import './index.css';
+import { HelmetProvider } from 'react-helmet-async'; // Add this
 
 /**
  * Main entry point for the AGFMA frontend application
@@ -19,9 +20,9 @@ if (import.meta.env.PROD) {
       if (prop === 'renderers') {
         window.__REACT_DEVTOOLS_GLOBAL_HOOK__[prop] = new Map();
       } else {
-        window.__REACT_DEVTOOLS_GLOBAL_HOOK__[prop] = 
-          typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__[prop] === 'function' 
-            ? () => {} 
+        window.__REACT_DEVTOOLS_GLOBAL_HOOK__[prop] =
+          typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__[prop] === 'function'
+            ? () => { }
             : null;
       }
     }
@@ -63,7 +64,7 @@ const checkForSuspiciousParams = () => {
     /alert\(/i,
     /eval\(/i,
   ];
-  
+
   for (const [key, value] of urlParams.entries()) {
     if (value && suspiciousPatterns.some(pattern => pattern.test(value))) {
       urlParams.delete(key);
@@ -82,7 +83,7 @@ const handleError = (error, errorInfo) => {
   if (error?.message?.includes('security') || error?.message?.includes('CSP')) {
     return;
   }
-  
+
   console.error('Application Error:', error, errorInfo);
 };
 
@@ -93,21 +94,23 @@ checkForSuspiciousParams();
 // Render the application with future flags to silence React Router warnings
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <SecurityErrorBoundary>
-      <ErrorBoundary onError={handleError}>
-        <BrowserRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <SecurityProvider>
-            <AuthProvider>
-              <App />
-            </AuthProvider>
-          </SecurityProvider>
-        </BrowserRouter>
-      </ErrorBoundary>
-    </SecurityErrorBoundary>
+    <HelmetProvider>
+      <SecurityErrorBoundary>
+        <ErrorBoundary onError={handleError}>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            <SecurityProvider>
+              <AuthProvider>
+                <App />
+              </AuthProvider>
+            </SecurityProvider>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </SecurityErrorBoundary>
+    </HelmetProvider>
   </React.StrictMode>
 );

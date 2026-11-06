@@ -55,40 +55,87 @@
 // };
 
 // export default PrivateRoute;
+
+
+
+// import { Navigate, Outlet } from 'react-router-dom';
+// import { useAuth } from '../../context/AuthContext';
+// import LoadingSpinner from './LoadingSpinner';
+
+// const PrivateRoute = () => {
+//   const { isAuthenticated, loading, user, hasPaidRegistration } = useAuth();
+
+//   if (loading) {
+//     return <LoadingSpinner fullScreen />;
+//   }
+
+//   if (!isAuthenticated || !user) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   // Role-based redirects
+//   if (user.role === 'admin') {
+//     // Admin trying to access member-only route? Redirect to admin dashboard
+//     if (window.location.pathname === '/dashboard') {
+//       return <Navigate to="/admin-dashboard" replace />;
+//     }
+//   } else {
+//     // Member trying to access admin route
+//     if (window.location.pathname.startsWith('/admin')) {
+//       return <Navigate to="/dashboard" replace />;
+//     }
+
+//     // Check payment for members
+//     if (!hasPaidRegistration && window.location.pathname !== '/payments') {
+//       return <Navigate to="/payments" replace />;
+//     }
+//   }
+
+//   return <Outlet />;
+// };
+
+// export default PrivateRoute;
+
+
+
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 
-const PrivateRoute = () => {
-  const { isAuthenticated, loading, user, hasPaidRegistration } = useAuth();
+const PrivateRoute = ({ children, roleRequired }) => {
+  const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {
     return <LoadingSpinner fullScreen />;
   }
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  // Role-based redirects
-  if (user.role === 'admin') {
-    // Admin trying to access member-only route? Redirect to admin dashboard
-    if (window.location.pathname === '/dashboard') {
-      return <Navigate to="/admin-dashboard" replace />;
-    }
-  } else {
-    // Member trying to access admin route
-    if (window.location.pathname.startsWith('/admin')) {
-      return <Navigate to="/dashboard" replace />;
-    }
-
-    // Check payment for members
-    if (!hasPaidRegistration && window.location.pathname !== '/payments') {
-      return <Navigate to="/payments" replace />;
-    }
+  // SUPER ADMIN - Full access to everything (handle both formats)
+  if (user?.role === 'super-admin' || user?.role === 'super_admin') {
+    return children || <Outlet />;
   }
 
-  return <Outlet />;
+  // Check role-based access for non-super-admin users
+  if (roleRequired === 'super-admin' && user?.role !== 'super-admin' && user?.role !== 'super_admin') {
+    return <Navigate to={user?.role === 'admin' ? '/admin-dashboard' : '/dashboard'} replace />;
+  }
+
+  if (roleRequired === 'admin' && user?.role !== 'admin') {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  if (roleRequired === 'member' && user?.role !== 'member') {
+    return <Navigate to="/admin-dashboard" replace />;
+  }
+
+  // REMOVED: No forced redirect to payments for members without registration
+  // Members can access dashboard freely and pay whenever they want
+  // The reminder card in the dashboard will handle payment reminders
+
+  return children || <Outlet />;
 };
 
 export default PrivateRoute;

@@ -35,7 +35,7 @@ const RecentTransactions = ({ limit = 5, isMobile = false, showViewAll = true })
         } else if (Array.isArray(incomesResponse?.data)) {
           incomes = incomesResponse.data;
         }
-        
+
         incomes.forEach(inc => {
           allTransactions.push({
             id: inc._id,
@@ -63,7 +63,7 @@ const RecentTransactions = ({ limit = 5, isMobile = false, showViewAll = true })
         } else if (Array.isArray(expendituresResponse?.data)) {
           expenditures = expendituresResponse.data;
         }
-        
+
         expenditures.forEach(exp => {
           allTransactions.push({
             id: exp._id,
@@ -91,10 +91,10 @@ const RecentTransactions = ({ limit = 5, isMobile = false, showViewAll = true })
         } else if (Array.isArray(paymentsResponse?.data)) {
           payments = paymentsResponse.data;
         }
-        
+
         // Filter only paid payments
         const paidPayments = payments.filter(p => p && p.status === 'paid');
-        
+
         paidPayments.forEach(payment => {
           allTransactions.push({
             id: payment._id,
@@ -114,10 +114,10 @@ const RecentTransactions = ({ limit = 5, isMobile = false, showViewAll = true })
 
       // Sort by date (newest first)
       allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
+
       // Take only the requested limit
       setTransactions(allTransactions.slice(0, limit));
-      
+
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast.error('Failed to load recent transactions');
@@ -272,17 +272,17 @@ const RecentTransactions = ({ limit = 5, isMobile = false, showViewAll = true })
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <p className="text-xs text-gray-400 truncate max-w-[150px]">
-                      {transaction.reference?.slice(0, 10) || 
-                       transaction.transactionReference?.slice(0, 10) || 
+                      {transaction.reference?.slice(0, 10) ||
+                       transaction.transactionReference?.slice(0, 10) ||
                        getTransactionLabel(transaction.type)}
                     </p>
-                    <span className="text-xs text-gray-300">•</span>
+                    <span className="text-xs text-gray-300">â€¢</span>
                     <p className="text-xs text-gray-400">
                       {formatDate(transaction.date)}
                     </p>
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    transaction.type === 'income' ? 'bg-green-100 text-green-700' : 
+                    transaction.type === 'income' ? 'bg-green-100 text-green-700' :
                     transaction.type === 'expense' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'
                   }`}>
                     {getTransactionLabel(transaction.type)}
@@ -344,7 +344,7 @@ export const CompactRecentTransactions = ({ limit = 3 }) => {
         } else if (Array.isArray(incomesResponse?.data)) {
           incomes = incomesResponse.data;
         }
-        
+
         incomes.forEach(inc => {
           allTransactions.push({
             id: inc._id,
@@ -369,7 +369,7 @@ export const CompactRecentTransactions = ({ limit = 3 }) => {
         } else if (Array.isArray(expendituresResponse?.data)) {
           expenditures = expendituresResponse.data;
         }
-        
+
         expenditures.forEach(exp => {
           allTransactions.push({
             id: exp._id,
@@ -394,7 +394,7 @@ export const CompactRecentTransactions = ({ limit = 3 }) => {
         } else if (Array.isArray(paymentsResponse?.data)) {
           payments = paymentsResponse.data;
         }
-        
+
         const paidPayments = payments.filter(p => p && p.status === 'paid');
         paidPayments.forEach(payment => {
           allTransactions.push({
@@ -412,7 +412,7 @@ export const CompactRecentTransactions = ({ limit = 3 }) => {
       // Sort and limit
       allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
       setTransactions(allTransactions.slice(0, limit));
-      
+
     } catch (error) {
       console.error('Error fetching transactions:', error);
     } finally {
@@ -483,7 +483,7 @@ export const CompactRecentTransactions = ({ limit = 3 }) => {
           onClick={() => navigate('/account')}
           className="w-full text-xs text-blue-600 text-center pt-2"
         >
-          View all →
+          View all â†’
         </button>
       )}
     </div>

@@ -8,7 +8,7 @@ const SecurityAudit = () => {
   if (process.env.NODE_ENV !== 'production') {
     return null;
   }
-  
+
   return (
     <Suspense fallback={null}>
       <SecurityAuditComponent />

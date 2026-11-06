@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import StatsCard from './StatsCard';
 import api from '../../services/api';
-import { 
-  CreditCard, 
-  DollarSign, 
-  CheckCircle, 
+import {
+  CreditCard,
+  DollarSign,
+  CheckCircle,
   AlertCircle,
   TrendingUp,
   Users,
@@ -42,7 +42,7 @@ const MemberDashboard = () => {
   const [orgSummary, setOrgSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const [incomeList, setIncomeList] = useState([]);
   const [expenditureList, setExpenditureList] = useState([]);
   const [incomeFilter, setIncomeFilter] = useState('all');
@@ -70,7 +70,7 @@ const MemberDashboard = () => {
         api.get(`/users/${user?.id}/payment-summary`),
         api.get('/reports/summary')
       ]);
-      
+
       setPayments(paymentsRes.data.data || []);
       setSummary(summaryRes.data.data);
       setOrgSummary(orgSummaryRes.data.data);
@@ -87,7 +87,7 @@ const MemberDashboard = () => {
     try {
       const incomeRes = await api.get('/transactions/income');
       const expenditureRes = await api.get('/transactions/expenditure');
-      
+
       setIncomeList(incomeRes.data.data || []);
       setExpenditureList(expenditureRes.data.data || []);
     } catch (error) {
@@ -124,12 +124,12 @@ const MemberDashboard = () => {
   const incomeCategories = ['all', ...new Set(incomeList.map(item => item.category))];
   const expenditureCategories = ['all', ...new Set(expenditureList.map(item => item.category))];
 
-  const filteredIncome = incomeFilter === 'all' 
-    ? incomeList 
+  const filteredIncome = incomeFilter === 'all'
+    ? incomeList
     : incomeList.filter(item => item.category === incomeFilter);
-    
-  const filteredExpenditure = expenditureFilter === 'all' 
-    ? expenditureList 
+
+  const filteredExpenditure = expenditureFilter === 'all'
+    ? expenditureList
     : expenditureList.filter(item => item.category === expenditureFilter);
 
   const totalIncome = filteredIncome.reduce((sum, item) => sum + item.amount, 0);
@@ -151,8 +151,8 @@ const MemberDashboard = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', { 
-      month: 'short', 
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
@@ -213,7 +213,7 @@ const MemberDashboard = () => {
           <p className="text-xs text-gray-500">Total Paid</p>
           <p className="text-lg font-bold text-green-600">{formatCurrency(totalPaid)}</p>
         </div>
-        
+
         <div className="bg-white rounded-2xl shadow-sm p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
@@ -223,7 +223,7 @@ const MemberDashboard = () => {
           <p className="text-xs text-gray-500">Outstanding</p>
           <p className="text-lg font-bold text-yellow-600">{formatCurrency(totalOutstanding)}</p>
         </div>
-        
+
         <div className="bg-white rounded-2xl shadow-sm p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
@@ -233,7 +233,7 @@ const MemberDashboard = () => {
           <p className="text-xs text-gray-500">Payments Made</p>
           <p className="text-lg font-bold text-blue-600">{paidPayments.length}</p>
         </div>
-        
+
         <div className="bg-white rounded-2xl shadow-sm p-3">
           <div className="flex items-center justify-between mb-2">
             <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
@@ -281,8 +281,8 @@ const MemberDashboard = () => {
               <button
                 onClick={() => setActiveTab('income')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === 'income' 
-                    ? 'bg-green-600 text-white shadow-md' 
+                  activeTab === 'income'
+                    ? 'bg-green-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
@@ -291,8 +291,8 @@ const MemberDashboard = () => {
               <button
                 onClick={() => setActiveTab('expenditure')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  activeTab === 'expenditure' 
-                    ? 'bg-red-600 text-white shadow-md' 
+                  activeTab === 'expenditure'
+                    ? 'bg-red-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-600'
                 }`}
               >
@@ -326,7 +326,7 @@ const MemberDashboard = () => {
           {/* Category Filter - Horizontal Scroll */}
           <div className="mb-4 overflow-x-auto -mx-1 px-1">
             <div className="flex gap-2 pb-1">
-              {activeTab === 'income' 
+              {activeTab === 'income'
                 ? incomeCategories.map(category => (
                     <button
                       key={category}
@@ -374,7 +374,7 @@ const MemberDashboard = () => {
                   <p className="text-xs text-gray-500">No records found</p>
                 </div>
               )}
-              
+
               {activeTab === 'income' && filteredIncome.slice(0, 5).map(income => {
                 const IconComponent = categoryIcons[income.category] || Package;
                 return (
@@ -440,7 +440,7 @@ const MemberDashboard = () => {
                 <div className="text-right">
                   <p className="font-bold text-yellow-600 text-sm">{formatCurrency(payment.amount)}</p>
                   <Link to="/payments" className="text-xs text-blue-600 font-medium">
-                    Pay Now →
+                    Pay Now â†’
                   </Link>
                 </div>
               </div>

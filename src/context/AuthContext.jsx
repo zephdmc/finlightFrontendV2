@@ -1,11 +1,11 @@
-// AuthContext.jsx - Fixed version - No registration payment required
+// AuthContext.jsx - Multi‑tenant version (fixed)
 import { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
 if (typeof window !== 'undefined' && !window.process) {
-    window.process = { env: {} };
+  window.process = { env: {} };
 }
 
 const AuthContext = createContext();
@@ -37,13 +37,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const { data } = await api.get('/auth/me');
       const userData = data.user || data.data?.user;
-      
-      // FORCE registration status to true
+
+      // Only set registration flags if the backend doesn't send them (temporary)
       if (userData) {
-        userData.hasPaidRegistration = true;
-        userData.hasCompletedRegistration = true;
+        if (userData.hasPaidRegistration === undefined) userData.hasPaidRegistration = true;
+        if (userData.hasCompletedRegistration === undefined) userData.hasCompletedRegistration = true;
       }
-      
+
       setUser(userData);
     } catch (error) {
       localStorage.removeItem('token');
@@ -58,42 +58,78 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.post('/auth/login', { email, password });
       const token = data.token || data.data?.token;
       let userData = data.user || data.data?.user;
-  
+
       if (!token || !userData) {
         throw new Error('Invalid response from server');
       }
-  
-      // FORCE registration status to true - NO PAYMENT REQUIRED
+
+      // Ensure organizationId is present (backend should provide it)
+      if (!userData.organizationId) {
+        console.warn('Login response missing organizationId – multi‑tenancy may not work correctly');
+      }
+
+      // Do NOT force role to 'admin' – keep the backend's role
+      // Add temporary flags only if missing
       userData = {
         ...userData,
-        hasPaidRegistration: true,
-        hasCompletedRegistration: true,
-        isActive: true,
-        role: userData?.role || 'admin'
+        hasPaidRegistration: userData.hasPaidRegistration ?? true,
+        hasCompletedRegistration: userData.hasCompletedRegistration ?? true,
+        isActive: userData.isActive ?? true,
+        // role is kept as is from backend
       };
-  
+
       localStorage.setItem('token', token);
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
       setUser(userData);
-  
-      toast.success('Login successful! Full access granted.');
-  
-      // DIRECT NAVIGATION TO DASHBOARD - NO REGISTRATION CHECKS
-      // Send all users directly to dashboard regardless of role or payment status
-      navigate('/dashboard');
-      
+
+      toast.success('Login successful!');
+
+      // 🧭 Navigate based on role
+      if (userData.role === 'super-admin') {
+        navigate('/super-admin/dashboard');
+      } else if (userData.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/dashboard');
+      }
+
       return { success: true, user: userData };
     } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.response?.data?.message || error.message || 'Login failed');
-      return { success: false };
+
+      let msg = 'Login failed. Please try again.';
+
+      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+        msg = 'Server is waking up. Please wait 30–60 seconds and try again.';
+      } else if (!error.response) {
+        msg = 'Cannot reach the server. Please check your internet connection.';
+      } else {
+        const data = error.response.data;
+        const status = error.response.status;
+
+        if (data?.message) {
+          msg = data.message;
+        } else if (Array.isArray(data?.errors) && data.errors.length > 0) {
+          // ValidationMiddleware returns { errors: [{ field, message }] }
+          msg = data.errors.map((e) => e.message || e.msg).join(' ');
+        } else if (status === 401) {
+          msg = 'Invalid email or password.';
+        } else if (status === 429) {
+          msg = 'Too many login attempts. Please try again later.';
+        } else if (status >= 500) {
+          msg = 'Server error. Please try again in a moment.';
+        }
+      }
+
+      toast.error(msg, { duration: 6000 });
+      return { success: false, error: msg };   // ← also return the message
     }
   };
 
-  // Admin only registration - creates new members
+  // Admin only registration – creates new members under the same organization
   const registerMember = async (userData) => {
     try {
+      // The backend will automatically assign the organization of the logged‑in admin.
       const { data } = await api.post('/users/register', userData);
       toast.success('Member added successfully!');
       return { success: true, data };
@@ -121,8 +157,10 @@ export const AuthProvider = ({ children }) => {
     registerMember,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin',
-    hasPaidRegistration: true, // Always return true
-    hasCompletedRegistration: true // Always return true
+    isSuperAdmin: user?.role === 'super-admin',  // match backend role string
+    hasPaidRegistration: user?.hasPaidRegistration ?? true,
+    hasCompletedRegistration: user?.hasCompletedRegistration ?? true,
+    organizationId: user?.organizationId,
   };
 
   return (

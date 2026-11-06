@@ -59,14 +59,14 @@ class RateLimiter {
   isAllowed(key) {
     const now = Date.now();
     const userRequests = this.requests.get(key) || [];
-    
+
     // Remove old requests
     const validRequests = userRequests.filter(time => now - time < this.timeWindow);
-    
+
     if (validRequests.length >= this.maxRequests) {
       return false;
     }
-    
+
     validRequests.push(now);
     this.requests.set(key, validRequests);
     return true;
@@ -136,18 +136,18 @@ export const addCSPHeaders = () => {
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
     font-src 'self' https://fonts.gstatic.com data:;
     img-src 'self' data: https:;
-    connect-src 'self' https://api.paystack.co https://finlightmanager.web.app https://*.paystack.com https://finlight-backend.onrender.com wss:;
+    connect-src 'self' https://api.paystack.co  https://finlightv2.web.app https://*.paystack.com https://finlightBackendV2.onrender.com wss:;
     frame-src https://checkout.paystack.com https://www.google.com;
     object-src 'none';
     base-uri 'self';
     form-action 'self';
   `.replace(/\s+/g, ' ').trim();
-  
+
   // Remove existing CSP meta tag if present
   const existingCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
   if (existingCSP) {
     existingCSP.remove();
   }
-  
+
   document.head.appendChild(meta);
 };

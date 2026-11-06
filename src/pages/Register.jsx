@@ -31,14 +31,14 @@ const Register = () => {
       navigate('/login');
       return;
     }
-    
+
     // If authenticated but not admin, redirect to dashboard
     if (!authLoading && isAuthenticated && !isAdmin) {
       toast.error('Only admins can access the registration page');
       navigate('/dashboard');
       return;
     }
-    
+
     // If admin but not in "add member" mode, redirect to admin dashboard
     if (!authLoading && isAdmin && !isAdminAddingMember) {
       navigate('/admin-dashboard');
@@ -55,51 +55,51 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (formData.name.length < 2) {
       newErrors.name = 'Name must be at least 2 characters';
     }
-    
+
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setLoading(true);
-    
+
     const result = await registerMember({
       name: formData.name,
       email: formData.email,
       password: formData.password,
       role: formData.role
     });
-    
+
     setLoading(false);
-    
+
     if (result.success) {
       // Reset form
       setFormData({
@@ -159,7 +159,7 @@ const Register = () => {
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to Members
         </button>
-        
+
         <div className="text-center">
           <div className="h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mx-auto">
             <span className="text-white font-bold text-xl">A</span>
@@ -171,7 +171,7 @@ const Register = () => {
             Register a new member to the organization
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {/* Name Field */}
           <div>
@@ -193,7 +193,7 @@ const Register = () => {
             </div>
             {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
           </div>
-          
+
           {/* Email Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -214,7 +214,7 @@ const Register = () => {
             </div>
             {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
           </div>
-          
+
           {/* Password Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -245,7 +245,7 @@ const Register = () => {
               Password must be at least 6 characters
             </p>
           </div>
-          
+
           {/* Confirm Password Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -266,7 +266,7 @@ const Register = () => {
             </div>
             {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
           </div>
-          
+
           {/* Role Field */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -288,7 +288,7 @@ const Register = () => {
               Admins have full access to manage members and financial records
             </p>
           </div>
-          
+
           {/* Submit Button */}
           <button
             type="submit"

@@ -84,7 +84,7 @@ export const SkeletonLoader = ({ type = 'card', count = 1 }) => {
   };
 
   const SkeletonComponent = skeletons[type] || skeletons.card;
-  
+
   if (count > 1 && type !== 'table') {
     return (
       <div className="space-y-4">

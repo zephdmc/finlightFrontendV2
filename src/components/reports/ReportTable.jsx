@@ -5,14 +5,14 @@ import { ChevronLeft, ChevronRight, Download, Search, Filter, X, Eye, FileText, 
  * Report Table Component - Banking App Style
  * Reusable table component for displaying report data with pagination and export
  */
-const ReportTable = ({ 
-  data, 
-  columns, 
-  title, 
-  onExport, 
+const ReportTable = ({
+  data,
+  columns,
+  title,
+  onExport,
   loading = false,
   showSearch = true,
-  showFilters = true 
+  showFilters = true
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,12 +47,12 @@ const ReportTable = ({
       });
       if (!matchesSearch) return false;
     }
-    
+
     // Column filters
     for (const [key, value] of Object.entries(activeFilters)) {
       if (value && item[key] !== value) return false;
     }
-    
+
     return true;
   }) || [];
 
@@ -61,7 +61,7 @@ const ReportTable = ({
     if (!sortColumn) return 0;
     const aVal = a[sortColumn];
     const bVal = b[sortColumn];
-    
+
     if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
     if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
     return 0;
@@ -83,7 +83,7 @@ const ReportTable = ({
 
   const getSortIcon = (key) => {
     if (sortColumn !== key) return null;
-    return sortDirection === 'asc' ? '↑' : '↓';
+    return sortDirection === 'asc' ? 'â†‘' : 'â†“';
   };
 
   const clearAllFilters = () => {
@@ -176,7 +176,7 @@ const ReportTable = ({
             {searchTerm && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-white/20 rounded-lg text-xs">
                 Search: "{searchTerm}"
-                <button onClick={() => setSearchTerm('')} className="hover:text-white/80">×</button>
+                <button onClick={() => setSearchTerm('')} className="hover:text-white/80">Ã—</button>
               </span>
             )}
             {Object.entries(activeFilters).map(([key, value]) => (
@@ -189,7 +189,7 @@ const ReportTable = ({
                     return newFilters;
                   });
                   setCurrentPage(1);
-                }} className="hover:text-white/80">×</button>
+                }} className="hover:text-white/80">Ã—</button>
               </span>
             ))}
             <button
@@ -227,14 +227,14 @@ const ReportTable = ({
                   {columns.map((column) => {
                     const value = row[column.key];
                     if (value === undefined || value === null) return null;
-                    
+
                     let displayValue = value;
                     if (column.key.includes('amount') || column.key === 'total' || column.key === 'price') {
                       displayValue = formatCurrency(value);
                     } else if (column.key === 'date' || column.key.includes('Date')) {
                       displayValue = new Date(value).toLocaleDateString();
                     }
-                    
+
                     return (
                       <div key={column.key} className="flex justify-between items-center">
                         <span className="text-xs text-gray-500">{column.label}</span>
@@ -292,7 +292,7 @@ const ReportTable = ({
                         } else if (column.key === 'date' || column.key.includes('Date')) {
                           displayValue = value ? new Date(value).toLocaleDateString() : '-';
                         }
-                        
+
                         return (
                           <td key={column.key} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {column.render ? column.render(value, row) : displayValue || '-'}
@@ -322,7 +322,7 @@ const ReportTable = ({
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            
+
             {/* Page numbers - simplified for mobile */}
             {!isMobile && (
               <div className="flex gap-1">
@@ -337,7 +337,7 @@ const ReportTable = ({
                   } else {
                     pageNum = currentPage - 2 + i;
                   }
-                  
+
                   return (
                     <button
                       key={pageNum}
@@ -354,7 +354,7 @@ const ReportTable = ({
                 })}
               </div>
             )}
-            
+
             <button
               onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}

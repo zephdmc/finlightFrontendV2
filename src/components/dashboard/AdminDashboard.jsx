@@ -210,8 +210,8 @@ const AdminDashboard = () => {
         return true;
       });
 
-            // â­ Penalties are NOT added to income â€” the base `amount` already reflects
-      // the correct value (penalties were double-counting â‚¦200)
+      // â­ Penalties are NOT added to income â€” the base `amount` already reflects
+      // the correct value (penalties were double-counting 200)
       // â­ Penalties ARE income â€” include them in total
       let totalPaymentsAmount = 0;
       let totalPenalties = 0;
@@ -994,7 +994,7 @@ const AdminDashboard = () => {
                               {/* â­ Show penalty badge */}
                               {hasPenalty && (
                                 <span className="ml-2 text-xs bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full">
-                                  +â‚¦{transaction.penaltyAmount} penalty
+                                  +{transaction.penaltyAmount} penalty
                                 </span>
                               )}
                             </p>

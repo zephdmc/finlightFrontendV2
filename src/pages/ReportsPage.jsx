@@ -1,10 +1,16 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../components/common/Navbar';
+// import Navbar from '../components/common/Navbar';
+import { useAuth } from '../context/AuthContext';
 import ReportsDashboard from '../components/reports/ReportsDashboard';
 import PaymentTypeReport from '../components/reports/PaymentTypeReport';
-import { BarChart3, Download, Calendar, FileText, TrendingUp, TrendingDown, Users, ChevronRight, Filter, X, RefreshCw, PieChart, Loader } from 'lucide-react';
+import { BarChart3, Download, Calendar, FileText, TrendingUp, TrendingDown, Users, ChevronRight, Filter, X, RefreshCw, PieChart, Loader, ArrowLeft, CreditCard } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../services/api';
+import { usePayments, useTransactions, useUsers } from '../hooks/usePaymentData';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useNavigate, Link } from 'react-router-dom';
+import Navbar from '../components/common/Navbar';
+
 
 /**
  * Reports Page Component - Banking App Style
@@ -20,6 +26,14 @@ const ReportsPage = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [refreshing, setRefreshing] = useState(false);
   const [exporting, setExporting] = useState(null);
+  const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
+
+  // ========== REACT QUERY HOOKS (for data freshness) ==========
+  const { refetch: refetchPayments } = usePayments({});
+  const { refetch: refetchIncomes } = useTransactions('income');
+  const { refetch: refetchExpenditures } = useTransactions('expenditure');
+  const { refetch: refetchUsers } = useUsers();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -28,17 +42,26 @@ const ReportsPage = () => {
   }, []);
 
   const tabs = [
-    { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
-    { id: 'payment-filter', label: 'Payment Filter', icon: Filter },
-    { id: 'financial', label: 'Export', icon: Download }
+    { id: 'dashboard', label: 'Dashboard', },
+    { id: 'payment-filter', label: 'Contribution List', },
+    { id: 'financial', label: 'Export', }
   ];
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
+    try {
+      await Promise.all([
+        refetchPayments(),
+        refetchIncomes(),
+        refetchExpenditures(),
+        refetchUsers()
+      ]);
       toast.success('Reports refreshed');
-    }, 1000);
+    } catch (error) {
+      toast.error('Failed to refresh reports');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const applyDateFilter = () => {
@@ -56,8 +79,8 @@ const ReportsPage = () => {
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', { 
-      month: 'short', 
+    return new Date(date).toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
@@ -67,56 +90,160 @@ const ReportsPage = () => {
     setExporting(type);
     try {
       let url = '';
-      switch(type) {
+      let fileName = '';
+
+      switch (type) {
+        case 'payments':
+          url = `/payments/all`;
+          fileName = `payments_report_${new Date().toISOString().split('T')[0]}`;
+          break;
         case 'income':
           url = `/reports/export/income?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+          fileName = `income_report_${new Date().toISOString().split('T')[0]}`;
           break;
         case 'expenditure':
           url = `/reports/export/expenditure?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`;
+          fileName = `expenditure_report_${new Date().toISOString().split('T')[0]}`;
           break;
         case 'members':
           url = `/reports/export/members`;
-          break;
-        case 'payments':
-          url = `/payments/all`;
+          fileName = `members_report_${new Date().toISOString().split('T')[0]}`;
           break;
         default:
           return;
       }
-      
-      let response;
+
+      const response = await api.get(url);
+
+      // Extract data from response
+      let data = [];
       if (type === 'payments') {
-        response = await api.get(url);
-        // Convert to CSV
-        const data = response.data?.data?.records || response.data?.data || [];
-        const headers = Object.keys(data[0] || {});
-        const csvRows = [
-          headers.join(','),
-          ...data.map(row => headers.map(header => JSON.stringify(row[header] || '')).join(','))
-        ];
-        const csvContent = csvRows.join('\n');
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.setAttribute('download', `${type}_report_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(blobUrl);
+        // Handle payments data structure
+        if (response.data?.data?.records && Array.isArray(response.data.data.records)) {
+          data = response.data.data.records;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          data = response.data.data;
+        } else if (Array.isArray(response.data)) {
+          data = response.data;
+        } else {
+          data = [];
+        }
       } else {
-        const response = await api.get(url, { responseType: 'blob' });
-        const blob = new Blob([response.data], { type: 'text/csv' });
-        const blobUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.setAttribute('download', `${type}_report_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(blobUrl);
+        // Handle other export types
+        if (response.data?.data?.records && Array.isArray(response.data.data.records)) {
+          data = response.data.data.records;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          data = response.data.data;
+        } else if (Array.isArray(response.data)) {
+          data = response.data;
+        } else {
+          data = [];
+        }
       }
-      
+
+      if (!data || data.length === 0) {
+        toast.error('No data available for export');
+        setExporting(null);
+        return;
+      }
+
+      // Format data for CSV based on export type
+      let formattedData = [];
+
+      if (type === 'payments') {
+        formattedData = data.map(payment => {
+          // Extract user info
+          const userName = payment.user?.name || payment.user || 'N/A';
+          const userEmail = payment.user?.email || 'N/A';
+
+          // Extract payment type info
+          const paymentTypeName = payment.paymentTypeId?.name || payment.paymentTypeId || 'N/A';
+          const paymentTypeAmount = payment.paymentTypeId?.amount || payment.amount || 0;
+
+          // Get payment status
+          const status = payment.status || 'unknown';
+          const isPartial = payment.isPartial ? 'Yes' : 'No';
+
+          // Calculate amounts
+          const totalAmount = payment.amount || payment.originalAmount || paymentTypeAmount || 0;
+          const remainingAmount = payment.remainingAmount || 0;
+          const paidAmount = payment.totalPaidSoFar || payment.paidAmount || 0;
+
+          // Get net amount from partial payments
+          let netAmount = payment.netToOrganization || 0;
+          if (netAmount === 0 && payment.partialPayments && Array.isArray(payment.partialPayments)) {
+            netAmount = payment.partialPayments.reduce((sum, pp) => sum + (pp.netToOrg || 0), 0);
+          }
+
+          // Get payment date
+          const paymentDate = payment.createdAt || payment.paidAt || payment.dueDate || new Date();
+          const formattedDate = new Date(paymentDate).toLocaleDateString('en-US');
+
+          return {
+            'Payment ID': payment._id || 'N/A',
+            'Member Name': userName,
+            'Member Email': userEmail,
+            'Payment Type': paymentTypeName,
+            'Type': payment.type || 'N/A',
+            'Status': status,
+            'Is Partial': isPartial,
+            'Total Amount': totalAmount,
+            'Amount Paid': paidAmount,
+            'Remaining Amount': remainingAmount,
+            'Net Amount (Org)': netAmount || 0,
+            'Payment Date': formattedDate,
+            'Due Date': payment.dueDate ? new Date(payment.dueDate).toLocaleDateString('en-US') : 'N/A',
+            'Description': payment.description || 'N/A'
+          };
+        });
+      } else {
+        // Generic formatting for other exports
+        formattedData = data.map(item => {
+          const flatItem = {};
+          Object.keys(item).forEach(key => {
+            if (item[key] && typeof item[key] === 'object' && !Array.isArray(item[key])) {
+              // Flatten nested objects
+              Object.keys(item[key]).forEach(subKey => {
+                flatItem[`${key}_${subKey}`] = item[key][subKey] || '';
+              });
+            } else if (Array.isArray(item[key])) {
+              flatItem[key] = JSON.stringify(item[key]);
+            } else {
+              flatItem[key] = item[key] || '';
+            }
+          });
+          return flatItem;
+        });
+      }
+
+      // Create CSV
+      const headers = Object.keys(formattedData[0] || {});
+      const csvRows = [
+        headers.join(','),
+        ...formattedData.map(row =>
+          headers.map(header => {
+            const value = row[header] !== undefined && row[header] !== null ? row[header] : '';
+            // Escape commas and quotes
+            const stringValue = String(value);
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+              return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+            return stringValue;
+          }).join(',')
+        )
+      ];
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }); // Add BOM for Excel
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.setAttribute('download', `${fileName}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(blobUrl);
+
       toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} report downloaded successfully`);
     } catch (error) {
       console.error('Export error:', error);
@@ -126,31 +253,62 @@ const ReportsPage = () => {
     }
   };
 
+  const handleBackToHome = () => {
+    // Navigate based on user role
+    if (isAdmin) {
+      navigate('/admin-dashboard');
+    } else {
+      navigate('/dashboard');
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
+
       <Navbar />
-      
-      <div className="max-w-7xl mx-auto px-4 py-4 space-y-4">
-        {/* Header with Gradient */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                <h1 className="font-semibold text-lg">Reports & Analytics</h1>
+
+      <div className="max-w-7xl mx-auto  space-y-4">
+
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-b-3xl p-4 text-white">
+
+
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleBackToHome}
+                className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5" />
+                    <h1 className="font-semibold text-lg">Reports & Analytics</h1>
+                  </div>
+                  <p className="text-blue-100 text-xs mt-1">
+                    Comprehensive financial analytics
+                  </p>
+                </div>
+
               </div>
-              <p className="text-blue-100 text-xs mt-1">
-                Comprehensive financial analytics
-              </p>
             </div>
-            <button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors"
-            >
-              <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-            </button>
+            <div className="flex items-center gap-2">
+
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-colors backdrop-blur-sm"
+              >
+                <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
           </div>
+
+
+
+
+
+
 
           {/* Date Range Selector - Mobile Optimized */}
           <div className="mt-3">
@@ -166,7 +324,7 @@ const ReportsPage = () => {
               </div>
               <ChevronRight className={`h-4 w-4 transition-transform ${showDatePicker ? 'rotate-90' : ''}`} />
             </button>
-            
+
             {showDatePicker && (
               <div className="mt-2 bg-white/10 rounded-xl p-3 space-y-3">
                 <div>
@@ -215,33 +373,32 @@ const ReportsPage = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${
-                  isActive
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`flex-1 py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${isActive
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-600 text-white shadow-md'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} />
+                {/* <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-500'}`} /> */}
                 <span className={isMobile ? 'text-xs' : 'text-sm'}>{tab.label}</span>
               </button>
             );
           })}
         </div>
-        
+
         {/* Content */}
         {activeTab === 'dashboard' && <ReportsDashboard dateRange={dateRange} isMobile={isMobile} />}
-        
+
         {activeTab === 'payment-filter' && (
           <PaymentTypeReport dateRange={dateRange} isMobile={isMobile} />
         )}
-        
+
         {activeTab === 'financial' && (
           <div className="space-y-4">
             {/* Export Options Card */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
                 <h2 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
-                  <Download className="h-4 w-4 text-green-600" />
+                  <Download className="h-4 w-4 text-blue-600" />
                   Export Financial Data
                 </h2>
               </div>
@@ -249,7 +406,7 @@ const ReportsPage = () => {
                 <button
                   onClick={() => handleExport('payments')}
                   disabled={exporting === 'payments'}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl hover:from-blue-100 hover:to-indigo-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-blue-50 rounded-xl hover:from-blue-100 hover:to-blue-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -267,49 +424,7 @@ const ReportsPage = () => {
                   <Download className="h-5 w-5 text-blue-600" />
                 </button>
 
-                <button
-                  onClick={() => handleExport('income')}
-                  disabled={exporting === 'income'}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                      {exporting === 'income' ? (
-                        <Loader className="h-5 w-5 text-green-600 animate-spin" />
-                      ) : (
-                        <TrendingUp className="h-5 w-5 text-green-600" />
-                      )}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-800">Income Report</p>
-                      <p className="text-xs text-gray-500">CSV Format</p>
-                    </div>
-                  </div>
-                  <Download className="h-5 w-5 text-green-600" />
-                </button>
-
-                <button
-                  onClick={() => handleExport('expenditure')}
-                  disabled={exporting === 'expenditure'}
-                  className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-red-50 to-rose-50 rounded-xl hover:from-red-100 hover:to-rose-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                      {exporting === 'expenditure' ? (
-                        <Loader className="h-5 w-5 text-red-600 animate-spin" />
-                      ) : (
-                        <TrendingDown className="h-5 w-5 text-red-600" />
-                      )}
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-800">Expenditure Report</p>
-                      <p className="text-xs text-gray-500">CSV Format</p>
-                    </div>
-                  </div>
-                  <Download className="h-5 w-5 text-red-600" />
-                </button>
-
-                <button
+                {/* <button
                   onClick={() => handleExport('members')}
                   disabled={exporting === 'members'}
                   className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl hover:from-purple-100 hover:to-pink-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
@@ -328,20 +443,20 @@ const ReportsPage = () => {
                     </div>
                   </div>
                   <Download className="h-5 w-5 text-purple-600" />
-                </button>
+                </button> */}
               </div>
             </div>
 
             {/* Info Card */}
-            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4">
+            <div className="bg-gradient-to-r from-blue-50 to-pink-50 rounded-2xl p-4">
               <div className="flex items-start gap-3">
-                <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                  <FileText className="h-4 w-4 text-purple-600" />
+                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <FileText className="h-4 w-4 text-blue-600" />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-gray-800 mb-1">Report Information</h3>
                   <p className="text-xs text-gray-600">
-                    All reports are generated based on the selected date range. 
+                    All reports are generated based on the selected date range.
                     Data includes all transactions within the specified period.
                   </p>
                   <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
@@ -357,8 +472,5 @@ const ReportsPage = () => {
     </div>
   );
 };
-
-// Import missing CreditCard icon
-import { CreditCard } from 'lucide-react';
 
 export default ReportsPage;

@@ -175,7 +175,7 @@ const AccountPage = () => {
         }
         const totalAmount = (p?.amount || 0) + totalPenalty;
 
-              });
+      });
     }
 
     const formattedPayments = paymentsArray
@@ -188,7 +188,7 @@ const AccountPage = () => {
         // â­ ONLY count payments with status === 'paid'
         // This excludes fine/penalty records (like "6 times you came late")
         if (status !== 'paid') {
-                    return false;
+          return false;
         }
 
         return true;
@@ -230,7 +230,7 @@ const AccountPage = () => {
           subType: 'member_payment',
           category: paymentType,
           amount: totalAmount,
-          description: paymentDescription || `${paymentType} payment${totalPenalty > 0 ? ` (includes â‚¦${totalPenalty} penalty)` : ''}`,
+          description: paymentDescription || `${paymentType} payment${totalPenalty > 0 ? ` (includes ${totalPenalty} penalty)` : ''}`,
           memberName: payment?.memberName || payment?.name || 'Member',
           paymentMethod: payment?.paymentMethod || 'Card',
           date: payment?.date || payment?.paidAt || payment?.createdAt,
@@ -242,6 +242,8 @@ const AccountPage = () => {
         };
       });
 
+    console.log('Formatted payments total amount (including penalties):',
+      formattedPayments.reduce((sum, p) => sum + p.amount, 0));
 
     // Combine all transactions
     const allTransactions = [...formattedIncomes, ...formattedPayments, ...formattedExpenses];
@@ -742,7 +744,7 @@ const AccountPage = () => {
                           {/* â­ Show penalty badge */}
                           {transaction.penaltyAmount > 0 && (
                             <span className="ml-2 text-xs  text-gray-700 px-1.5 py-0.5 rounded-full">
-                              +â‚¦{transaction.penaltyAmount} penalty
+                              +{transaction.penaltyAmount} penalty
                             </span>
                           )}
                         </p>
@@ -807,7 +809,7 @@ const AccountPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (â‚¦) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount () *</label>
                 <input
                   type="number"
                   value={incomeForm.amount}
@@ -894,7 +896,7 @@ const AccountPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (â‚¦) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount () *</label>
                 <input
                   type="number"
                   value={expenseForm.amount}

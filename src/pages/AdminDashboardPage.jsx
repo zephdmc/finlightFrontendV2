@@ -66,7 +66,7 @@ const AdminDashboardPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <Navbar />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
         {/* Header with Gradient */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 text-white">
@@ -93,11 +93,11 @@ const AdminDashboardPage = () => {
           <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
             <Calendar className="h-3 w-3 text-blue-200" />
             <p className="text-xs text-blue-200">
-              {new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}
             </p>
           </div>
@@ -169,7 +169,7 @@ const AdminDashboardPage = () => {
             </div>
             <div className="text-right">
               <p className="text-xs text-green-100">Registration Fee</p>
-              <p className="text-lg font-semibold">₦500</p>
+              <p className="text-lg font-semibold">â‚¦500</p>
             </div>
           </div>
         </div>
@@ -178,28 +178,28 @@ const AdminDashboardPage = () => {
         <div className="bg-white rounded-2xl shadow-sm p-4">
           <h3 className="font-semibold text-gray-800 text-sm mb-3">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-2">
-            <button 
+            <button
               onClick={() => window.location.href = '/members/add'}
               className="flex items-center justify-between p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"
             >
               <span className="text-sm text-blue-700">Add Member</span>
               <ArrowRight className="h-4 w-4 text-blue-600" />
             </button>
-            <button 
+            <button
               onClick={() => window.location.href = '/payments'}
               className="flex items-center justify-between p-3 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
             >
               <span className="text-sm text-green-700">New Payment</span>
               <ArrowRight className="h-4 w-4 text-green-600" />
             </button>
-            <button 
+            <button
               onClick={() => window.location.href = '/reports'}
               className="flex items-center justify-between p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors"
             >
               <span className="text-sm text-purple-700">View Reports</span>
               <ArrowRight className="h-4 w-4 text-purple-600" />
             </button>
-            <button 
+            <button
               onClick={() => window.location.href = '/account'}
               className="flex items-center justify-between p-3 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors"
             >
@@ -213,7 +213,7 @@ const AdminDashboardPage = () => {
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center">
             <h3 className="font-semibold text-gray-800 text-sm">Recent Transactions</h3>
-            <button 
+            <button
               onClick={() => window.location.href = '/account'}
               className="text-xs text-blue-600 flex items-center gap-1"
             >
@@ -235,7 +235,7 @@ const AdminDashboardPage = () => {
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className="bg-green-500 rounded-full h-2 transition-all duration-500"
                   style={{ width: `${summary?.totalMembers > 0 ? ((summary.paidMembers / summary.totalMembers) * 100) : 0}%` }}
                 ></div>
@@ -243,7 +243,7 @@ const AdminDashboardPage = () => {
             </div>
             <div className="flex justify-between text-xs pt-2">
               <span className="text-gray-500">Registration Fee</span>
-              <span className="font-medium">₦500 per member</span>
+              <span className="font-medium">â‚¦500 per member</span>
             </div>
           </div>
         </div>
@@ -253,15 +253,15 @@ const AdminDashboardPage = () => {
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-3">
             <p className="text-xs text-gray-600 mb-1">Collection Rate</p>
             <p className="text-xl font-bold text-blue-600">
-              {summary?.totalMembers > 0 
-                ? Math.round((summary.paidMembers / summary.totalMembers) * 100) 
+              {summary?.totalMembers > 0
+                ? Math.round((summary.paidMembers / summary.totalMembers) * 100)
                 : 0}%
             </p>
           </div>
           <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-3">
             <p className="text-xs text-gray-600 mb-1">Avg Payment/Member</p>
             <p className="text-sm font-bold text-green-600">
-              {summary?.totalMembers > 0 
+              {summary?.totalMembers > 0
                 ? formatCurrency(Math.round(summary.totalIncome / summary.totalMembers))
                 : formatCurrency(0)}
             </p>

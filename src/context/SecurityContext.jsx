@@ -18,30 +18,30 @@ export const SecurityProvider = ({ children }) => {
   useEffect(() => {
     // Add CSP headers
     addCSPHeaders();
-    
+
     // Setup session timeout
     const resetSession = () => {
       sessionManager.resetTimer();
       setIsSessionActive(true);
     };
-    
+
     const logout = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       setIsSessionActive(false);
       window.location.href = '/login';
     };
-    
+
     sessionManager.addListener(logout);
-    
+
     // Track user activity
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
     events.forEach(event => {
       window.addEventListener(event, resetSession);
     });
-    
+
     sessionManager.startTimer();
-    
+
     return () => {
       events.forEach(event => {
         window.removeEventListener(event, resetSession);
